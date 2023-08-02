@@ -1,9 +1,25 @@
-import mongoose from 'mongoose'
+import mongoose, { Schema, Document, Types } from 'mongoose'
+
+export interface ICustomer extends Document {
+  idAccount: Types.ObjectId
+  fullname?: string
+  location?: Types.ObjectId
+  award?: number
+  bonusPoint: number
+  favoriteLocations?: Types.ObjectId[]
+  savedLocations?: Types.ObjectId[]
+  listMessages?: Types.ObjectId[]
+  defaultMethod?: number
+  listOrders?: Types.ObjectId[]
+  listBills?: Types.ObjectId[]
+}
 
 const CustomerSchema = new mongoose.Schema(
   {
     idAccount: {
-      type: mongoose.Types.ObjectId
+      type: Schema.Types.ObjectId,
+      ref: 'Account',
+      required: true
     },
     fullname: {
       type: String,
@@ -13,7 +29,8 @@ const CustomerSchema = new mongoose.Schema(
       type: mongoose.Types.ObjectId
     },
     award: {
-      type: Number
+      type: Number,
+      default: 0
     },
     bonusPoint: {
       type: Number,
@@ -35,7 +52,8 @@ const CustomerSchema = new mongoose.Schema(
       }
     ],
     defaultMethod: {
-      type: Number
+      type: Number,
+      default: 0
     },
     listOrders: [
       {
@@ -51,4 +69,4 @@ const CustomerSchema = new mongoose.Schema(
   { timestamps: false }
 )
 
-export default mongoose.model('Customer', CustomerSchema)
+export default mongoose.model<ICustomer>('Customer', CustomerSchema)

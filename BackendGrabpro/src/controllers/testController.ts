@@ -1,10 +1,5 @@
 import express from 'express'
-
-const catchAsync = <T extends (...args: any[]) => Promise<any>>(fn: T) => {
-  return (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    fn(req, res, next).catch(next)
-  }
-}
+import { catchAsync } from '~/utils/catchAsync'
 
 export default {
   getAllAddress: catchAsync(async (req: express.Request, res: express.Response, next: express.NextFunction) => {

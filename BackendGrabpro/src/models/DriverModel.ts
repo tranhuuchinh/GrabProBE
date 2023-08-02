@@ -1,19 +1,34 @@
-import mongoose from 'mongoose'
+import mongoose, { Schema, Document, Types } from 'mongoose'
+
+export interface IDriver extends Document {
+  idAccount: Types.ObjectId
+  fullname?: string
+  location?: Types.ObjectId
+  transport?: object
+  rating: number
+  income: number
+  listOrder?: Types.ObjectId[]
+  listMessage?: Types.ObjectId[]
+}
 
 const DriverSchema = new mongoose.Schema(
   {
     idAccount: {
-      type: mongoose.Types.ObjectId
+      type: Schema.Types.ObjectId,
+      ref: 'Account',
+      required: true
     },
     fullname: {
       type: String,
       trim: true
     },
     location: {
-      type: mongoose.Types.ObjectId
+      type: mongoose.Types.ObjectId,
+      default: null
     },
     transport: {
-      type: Object
+      type: Object,
+      default: {}
     },
     rating: {
       type: Number,
@@ -39,4 +54,4 @@ const DriverSchema = new mongoose.Schema(
   { timestamps: false }
 )
 
-export default mongoose.model('Driver', DriverSchema)
+export default mongoose.model<IDriver>('Driver', DriverSchema)
