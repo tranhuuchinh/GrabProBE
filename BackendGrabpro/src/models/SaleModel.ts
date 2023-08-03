@@ -1,4 +1,11 @@
-import mongoose from 'mongoose'
+import mongoose, { Document, Types } from 'mongoose'
+
+export interface ISale extends Document {
+  title: string
+  type: 'GrabCar' | 'GrabBike'
+  image: string
+  points: number
+}
 
 const SaleSchema = new mongoose.Schema(
   {
@@ -21,4 +28,4 @@ const SaleSchema = new mongoose.Schema(
   { timestamps: false }
 )
 
-export default mongoose.model('Sale', SaleSchema)
+export default mongoose.model<ISale>('Sale', SaleSchema)

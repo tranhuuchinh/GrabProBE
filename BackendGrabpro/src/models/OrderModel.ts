@@ -1,4 +1,21 @@
-import mongoose from 'mongoose'
+import mongoose, { Document, Types } from 'mongoose'
+
+export interface IOrder extends Document {
+  code: string
+  idCustomer: Types.ObjectId
+  idDriver: Types.ObjectId
+  from?: Types.ObjectId
+  to?: Types.ObjectId
+  distance?: string
+  status: number
+  method?: number
+  feedback: number
+  tax: number
+  baseTax: number
+  sale: number
+  totalPrice: number
+  bookTime?: Date
+}
 
 const OrderSchema = new mongoose.Schema(
   {
@@ -8,18 +25,18 @@ const OrderSchema = new mongoose.Schema(
       require: true
     },
     idCustomer: {
-      type: mongoose.Types.ObjectId,
-      unique: true
+      type: mongoose.Types.ObjectId
     },
     idDriver: {
-      type: mongoose.Types.ObjectId,
-      unique: true
+      type: mongoose.Types.ObjectId
     },
     from: {
-      type: mongoose.Types.ObjectId
+      type: mongoose.Types.ObjectId,
+      ref: 'Location'
     },
     to: {
-      type: mongoose.Types.ObjectId
+      type: mongoose.Types.ObjectId,
+      ref: 'Location'
     },
     distance: {
       type: String,
@@ -62,4 +79,4 @@ const OrderSchema = new mongoose.Schema(
   { timestamps: true }
 )
 
-export default mongoose.model('Order', OrderSchema)
+export default mongoose.model<IOrder>('Order', OrderSchema)

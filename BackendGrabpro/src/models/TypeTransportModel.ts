@@ -1,5 +1,11 @@
 import mongoose from 'mongoose'
 
+export interface ITypeTransport extends Document {
+  id: number
+  name: string
+  priceperKm: number
+}
+
 const TypeTransportSchema = new mongoose.Schema(
   {
     id: {
@@ -18,4 +24,4 @@ const TypeTransportSchema = new mongoose.Schema(
   { timestamps: false }
 )
 
-export default mongoose.model('TypeTransport', TypeTransportSchema)
+export default mongoose.model<ITypeTransport>('TypeTransport', TypeTransportSchema)

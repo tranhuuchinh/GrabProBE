@@ -1,4 +1,11 @@
-import mongoose from 'mongoose'
+import mongoose, { Document } from 'mongoose'
+
+export interface ILocation extends Document {
+  address?: string
+  description?: string
+  latitude?: number
+  altitude?: number
+}
 
 const LocationSchema = new mongoose.Schema(
   {
@@ -20,4 +27,4 @@ const LocationSchema = new mongoose.Schema(
   { timestamps: false }
 )
 
-export default mongoose.model('Location', LocationSchema)
+export default mongoose.model<ILocation>('Location', LocationSchema)

@@ -1,5 +1,12 @@
 import mongoose from 'mongoose'
 
+export interface IAward extends Document {
+  id: number
+  title: string
+  minpoint?: number
+  maxpoint?: number
+}
+
 const AwardSchema = new mongoose.Schema(
   {
     id: {
@@ -20,4 +27,4 @@ const AwardSchema = new mongoose.Schema(
   { timestamps: false }
 )
 
-export default mongoose.model('Award', AwardSchema)
+export default mongoose.model<IAward>('Award', AwardSchema)

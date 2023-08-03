@@ -21,7 +21,7 @@ const AccountSchema = new mongoose.Schema(
     phone: {
       type: String,
       required: [true, 'Phone must not empty'],
-      select: false,
+      select: true,
       unique: true,
       trim: true
     },

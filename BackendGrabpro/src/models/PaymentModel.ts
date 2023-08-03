@@ -1,10 +1,12 @@
 import mongoose from 'mongoose'
 
+export interface IPayment extends Document {
+  image: string
+  title: string
+}
+
 const PaymentSchema = new mongoose.Schema(
   {
-    id: {
-      type: Number
-    },
     image: {
       type: String,
       trim: true
@@ -17,4 +19,4 @@ const PaymentSchema = new mongoose.Schema(
   { timestamps: false }
 )
 
-export default mongoose.model('Payment', PaymentSchema)
+export default mongoose.model<IPayment>('Payment', PaymentSchema)

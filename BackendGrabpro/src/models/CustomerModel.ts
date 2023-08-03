@@ -8,10 +8,7 @@ export interface ICustomer extends Document {
   bonusPoint: number
   favoriteLocations?: Types.ObjectId[]
   savedLocations?: Types.ObjectId[]
-  listMessages?: Types.ObjectId[]
   defaultMethod?: number
-  listOrders?: Types.ObjectId[]
-  listBills?: Types.ObjectId[]
 }
 
 const CustomerSchema = new mongoose.Schema(
@@ -26,11 +23,8 @@ const CustomerSchema = new mongoose.Schema(
       trim: true
     },
     location: {
-      type: mongoose.Types.ObjectId
-    },
-    award: {
-      type: Number,
-      default: 0
+      type: mongoose.Types.ObjectId,
+      ref: 'Location'
     },
     bonusPoint: {
       type: Number,
@@ -38,33 +32,20 @@ const CustomerSchema = new mongoose.Schema(
     },
     favoriteLocations: [
       {
-        type: mongoose.Types.ObjectId
+        type: mongoose.Types.ObjectId,
+        ref: 'Location'
       }
     ],
     savedLocations: [
       {
-        type: mongoose.Types.ObjectId
-      }
-    ],
-    listMessages: [
-      {
-        type: mongoose.Types.ObjectId
+        type: mongoose.Types.ObjectId,
+        ref: 'Location'
       }
     ],
     defaultMethod: {
       type: Number,
-      default: 0
-    },
-    listOrders: [
-      {
-        type: mongoose.Types.ObjectId
-      }
-    ],
-    listBills: [
-      {
-        type: mongoose.Types.ObjectId
-      }
-    ]
+      default: 1
+    }
   },
   { timestamps: false }
 )

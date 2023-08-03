@@ -4,15 +4,21 @@
 import express from 'express'
 import dotenv from 'dotenv'
 import mongoose from 'mongoose'
-import test from '../src/routes/test'
 import userRoutes from '~/routes/userRoutes'
+import customerRoutes from '~/routes/customerRoutes'
+import messagesRoutes from '~/routes/messagesRoutes'
+import orderRoutes from '~/routes/orderRoutes'
+import billRoutes from '~/routes/billsRoute'
+import salesRoute from '~/routes/salesRoute'
+import informsRoute from '~/routes/informsRoute'
+import paymentsRoute from '~/routes/paymentsRoute'
 
 dotenv.config()
 
 /**
  * App Variables
  */
-const PORT: number = 4000
+const PORT: number = 3000
 
 const app = express()
 
@@ -24,8 +30,14 @@ app.use(express.json({ limit: '10mb' }))
 /**
  * ROUTES
  */
-app.use('/', test)
 app.use('/user', userRoutes)
+app.use('/customer', customerRoutes)
+app.use('/messages', messagesRoutes)
+app.use('/orders', orderRoutes)
+app.use('/bills', billRoutes)
+app.use('/sales', salesRoute)
+app.use('/informs', informsRoute)
+app.use('/payments', paymentsRoute)
 
 /**
  * Server Activation
@@ -49,6 +61,8 @@ mongoose
   .catch((err: Error) => {
     console.log('Failed to connect DB!')
   })
+
+require('./models/LocationModel')
 
 process.on('unhandledRejection', (err: Error) => {
   console.log('Unhandled Rejection. Shutting down...')
