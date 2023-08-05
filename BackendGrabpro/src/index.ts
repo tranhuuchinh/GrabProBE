@@ -1,6 +1,7 @@
 /**
  * Required External Modules
  */
+import cors from 'cors'
 import express from 'express'
 import dotenv from 'dotenv'
 import mongoose from 'mongoose'
@@ -21,6 +22,13 @@ dotenv.config()
 const PORT: number = 3000
 
 const app = express()
+app.use(
+  cors({
+    origin: '*',
+    credentials: true,
+    methods: ['GET', 'POST', 'PATCH', 'DELETE']
+  })
+)
 
 /**
  *  App Configuration
