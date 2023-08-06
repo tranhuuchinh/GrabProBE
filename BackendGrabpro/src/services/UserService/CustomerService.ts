@@ -22,4 +22,12 @@ export default class CustomerService {
       throw new Error(e.message)
     }
   }
+
+  public async getAllUser() {
+    try {
+      return await Customer.find({}).exec()
+    } catch (e: any) {
+      throw new Error(e.message)
+    }
+  }
 }
