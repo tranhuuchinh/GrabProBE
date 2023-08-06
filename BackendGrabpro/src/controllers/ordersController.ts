@@ -104,5 +104,30 @@ export default {
         message: error.message
       })
     }
+  }),
+
+  updateStatus: catchAsync(async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    const id = req.params.id
+
+    try {
+      const order = await OrderModel.findOneAndUpdate({ _id: id }, { status: 0 }, { new: true }).exec()
+
+      if (!order) {
+        return res.status(404).json({
+          status: 'error',
+          message: 'No order with id'
+        })
+      }
+
+      res.status(200).json({
+        status: 'success',
+        data: order
+      })
+    } catch (error: any) {
+      res.status(500).json({
+        status: 'error',
+        message: error.message
+      })
+    }
   })
 }

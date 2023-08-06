@@ -22,4 +22,12 @@ export default class HotlineService {
       throw new Error(e.message)
     }
   }
+
+  public async getAllUser() {
+    try {
+      return await Hotline.find({}).exec()
+    } catch (e: any) {
+      throw new Error(e.message)
+    }
+  }
 }

@@ -1,4 +1,4 @@
-import { type } from 'os'
+import { Types } from 'mongoose'
 import { ICustomer } from '~/models/CustomerModel'
 import { IDriver } from '~/models/DriverModel'
 import { IHotline } from '~/models/HotlineModel'
@@ -36,6 +36,23 @@ export default class UserFactory {
           return new AdminService(account?.id, fullname).createUser()
         default:
           return new CustomerService(account?.id, fullname).createUser()
+      }
+    } catch (e: any) {
+      throw new Error(e.message)
+    }
+  }
+
+  public static async getAllUser(typeUser: string) {
+    try {
+      switch (typeUser) {
+        case 'customer':
+          return new CustomerService('' as unknown as Types.ObjectId, '').getAllUser()
+        case 'driver':
+          return new DriverService('' as unknown as Types.ObjectId, '').getAllUser()
+        case 'hotline':
+          return new HotlineService('' as unknown as Types.ObjectId, '').getAllUser()
+        default:
+          return new CustomerService('' as unknown as Types.ObjectId, '').getAllUser()
       }
     } catch (e: any) {
       throw new Error(e.message)

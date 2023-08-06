@@ -22,4 +22,12 @@ export default class DriverService {
       throw new Error(e.message)
     }
   }
+
+  public async getAllUser() {
+    try {
+      return await Driver.find({}).exec()
+    } catch (e: any) {
+      throw new Error(e.message)
+    }
+  }
 }

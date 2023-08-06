@@ -14,6 +14,7 @@ import salesRoute from '~/routes/salesRoute'
 import informsRoute from '~/routes/informsRoute'
 import paymentsRoute from '~/routes/paymentsRoute'
 import driverRoute from '~/routes/driverRoute'
+import homeAdminRoute from '~/routes/homeAdminRoute'
 
 dotenv.config()
 
@@ -48,6 +49,7 @@ app.use('/bills', billRoutes)
 app.use('/sales', salesRoute)
 app.use('/informs', informsRoute)
 app.use('/payments', paymentsRoute)
+app.use('/homeAdmin', homeAdminRoute)
 
 /**
  * Server Activation
