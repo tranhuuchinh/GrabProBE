@@ -9,9 +9,6 @@ import { BonusRepository } from '~/services/CustomerService/BonusRepository'
 export default {
   getCustomer: catchAsync(async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     const id = req.params.id
-    let phone = ''
-    let email = ''
-    let mainAward = ''
 
     try {
       const customer = await CustomerModel.findOne({ idAccount: id })
@@ -27,38 +24,34 @@ export default {
         })
       }
 
+      //Get Phone and Email
+      const account = await AccountModel.findOne({ _id: id }).exec()
+      const phone = account?.phone || ''
+      const email = account?.email || ''
+
       //Get award
-      AwardModel.find({}).then((awards) => {
-        awards.forEach((award) => {
-          if (award.minpoint !== undefined && award.maxpoint !== undefined) {
-            if (customer.bonusPoint >= award.minpoint && customer.bonusPoint <= award.maxpoint) {
-              mainAward = award.title
-            } else {
-              mainAward = ''
-            }
+      const awards = await AwardModel.find({}).exec()
+      let mainAward = 'Premium' // Default value
+
+      awards.forEach((award) => {
+        if (award.minpoint !== undefined && award.maxpoint !== undefined) {
+          if (customer.bonusPoint >= award.minpoint && customer.bonusPoint <= award.maxpoint) {
+            mainAward = award.title
           }
-        })
+        }
       })
 
-      //Get Phone and Email
-      AccountModel.findOne({ _id: id })
-        .then(async (account) => {
-          phone = account?.phone || ''
-          email = account?.email || ''
+      const customerWithPhoneAndEmail = {
+        ...customer.toObject(),
+        phone,
+        email,
+        mainAward
+      }
 
-          const customerWithPhoneAndEmail = {
-            ...customer.toObject(),
-            phone,
-            email,
-            mainAward
-          }
-
-          res.status(200).json({
-            status: 'success',
-            data: customerWithPhoneAndEmail
-          })
-        })
-        .catch(next)
+      res.status(200).json({
+        status: 'success',
+        data: customerWithPhoneAndEmail
+      })
     } catch (error: any) {
       res.status(500).json({
         status: 'error',

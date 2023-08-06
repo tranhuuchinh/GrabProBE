@@ -13,6 +13,7 @@ import billRoutes from '~/routes/billsRoute'
 import salesRoute from '~/routes/salesRoute'
 import informsRoute from '~/routes/informsRoute'
 import paymentsRoute from '~/routes/paymentsRoute'
+import driverRoute from '~/routes/driverRoute'
 
 dotenv.config()
 
@@ -40,6 +41,7 @@ app.use(express.json({ limit: '10mb' }))
  */
 app.use('/user', userRoutes)
 app.use('/customer', customerRoutes)
+app.use('/driver', driverRoute)
 app.use('/messages', messagesRoutes)
 app.use('/orders', orderRoutes)
 app.use('/bills', billRoutes)

@@ -7,8 +7,6 @@ export interface IDriver extends Document {
   transport?: object
   rating: number
   income: number
-  listOrder?: Types.ObjectId[]
-  listMessage?: Types.ObjectId[]
 }
 
 const DriverSchema = new mongoose.Schema(
@@ -24,11 +22,25 @@ const DriverSchema = new mongoose.Schema(
     },
     location: {
       type: mongoose.Types.ObjectId,
+      ref: 'Location',
       default: null
     },
     transport: {
-      type: Object,
-      default: {}
+      name: {
+        type: String,
+        trim: true
+      },
+      code: {
+        type: String,
+        trim: true
+      },
+      color: {
+        type: String,
+        trim: true
+      },
+      type: {
+        type: Number
+      }
     },
     rating: {
       type: Number,
@@ -39,17 +51,7 @@ const DriverSchema = new mongoose.Schema(
     income: {
       type: Number,
       default: 0
-    },
-    listOrder: [
-      {
-        type: mongoose.Types.ObjectId
-      }
-    ],
-    listMessage: [
-      {
-        type: mongoose.Types.ObjectId
-      }
-    ]
+    }
   },
   { timestamps: false }
 )
