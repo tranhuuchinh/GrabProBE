@@ -37,9 +37,10 @@ export default {
 
   updateStatus: catchAsync(async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     const id = req.params.id
+    const body = req.body
 
     try {
-      const order = await OrderModel.findOneAndUpdate({ _id: id }, { status: 0 }, { new: true }).exec()
+      const order = await OrderModel.findOneAndUpdate({ _id: id }, body, { new: true }).exec()
 
       if (!order) {
         return res.status(404).json({

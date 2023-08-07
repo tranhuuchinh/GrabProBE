@@ -1,7 +1,7 @@
-import { Types } from 'mongoose'
-import { ICustomer } from '~/models/CustomerModel'
-import { IDriver } from '~/models/DriverModel'
-import { IHotline } from '~/models/HotlineModel'
+import { ObjectId, Types } from 'mongoose'
+import CustomerModel, { ICustomer } from '~/models/CustomerModel'
+import DriverModel, { IDriver } from '~/models/DriverModel'
+import HotlineModel, { IHotline } from '~/models/HotlineModel'
 import Account, { IAccount } from '~/models/AccountModel'
 import CustomerService from './CustomerService'
 import DriverService from './DriverService'
@@ -53,6 +53,26 @@ export default class UserFactory {
           return new HotlineService('' as unknown as Types.ObjectId, '').getAllUser()
         default:
           return new CustomerService('' as unknown as Types.ObjectId, '').getAllUser()
+      }
+    } catch (e: any) {
+      throw new Error(e.message)
+    }
+  }
+
+  public static async deleteUser(typeUser: string, idAccount: string) {
+    try {
+      if (typeUser === 'customer') {
+        const account = await CustomerModel.findOne({ idAccount: idAccount }).exec()
+
+        return new CustomerService(account?._id, '').deleteUser()
+      } else if (typeUser === 'driver') {
+        const account = await DriverModel.findOne({ idAccount: idAccount }).exec()
+
+        return new DriverService(account?._id, '').deleteUser()
+      } else if (typeUser === 'hotline') {
+        const account = await HotlineModel.findOne({ idAccount: idAccount }).exec()
+
+        return new HotlineService(account?._id as unknown as Types.ObjectId, '').deleteUser()
       }
     } catch (e: any) {
       throw new Error(e.message)

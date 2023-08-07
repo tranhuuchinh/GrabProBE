@@ -1,5 +1,6 @@
 import express from 'express'
 import AccountModel from '~/models/AccountModel'
+import LocationModel from '~/models/LocationModel'
 import UserFactory from '~/services/UserService/UserFactory'
 import { catchAsync } from '~/utils/catchAsync'
 
@@ -78,18 +79,89 @@ export default {
 
   deleteAccount: catchAsync(async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     const id = req.params.id
+    const type = req.query.type
 
     try {
-      const user = await AccountModel.findByIdAndDelete(id)
+      const account = await AccountModel.findByIdAndDelete(id)
+      // const account = {}
 
-      console.log(id)
-
-      if (!user) {
+      if (!account) {
         return res.status(404).json({
           status: 'error',
-          message: 'No user with id'
+          message: 'No account with id'
         })
       }
+
+      if (type === 'Customer') {
+        const customer = await UserFactory.deleteUser('customer', id)
+
+        if (!customer) {
+          return res.status(404).json({
+            status: 'error',
+            message: 'No customer with id'
+          })
+        } else {
+          return res.status(200).json({
+            status: 'success',
+            data: [account, customer]
+          })
+        }
+      } else if (type === 'Driver') {
+        const driver = await UserFactory.deleteUser('driver', id)
+
+        if (!driver) {
+          return res.status(404).json({
+            status: 'error',
+            message: 'No driver with id'
+          })
+        } else {
+          return res.status(200).json({
+            status: 'success',
+            data: [account, driver]
+          })
+        }
+      } else if (type === 'Staff') {
+        const hotline = await UserFactory.deleteUser('hotline', id)
+
+        if (!hotline) {
+          return res.status(404).json({
+            status: 'error',
+            message: 'No hotline with id'
+          })
+        } else {
+          return res.status(200).json({
+            status: 'success',
+            data: [account, hotline]
+          })
+        }
+      }
+    } catch (error: any) {
+      res.status(500).json({
+        status: 'error',
+        message: error.message
+      })
+    }
+  }),
+
+  getAccount: catchAsync(async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    try {
+      const user = await AccountModel.find({})
+
+      res.status(200).json({
+        status: 'success',
+        data: user
+      })
+    } catch (error: any) {
+      res.status(500).json({
+        status: 'error',
+        message: error.message
+      })
+    }
+  }),
+
+  getLocation: catchAsync(async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    try {
+      const user = await LocationModel.find({})
 
       res.status(200).json({
         status: 'success',
