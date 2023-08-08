@@ -49,7 +49,7 @@ const OrderSchema = new mongoose.Schema(
     },
     status: {
       type: Number,
-      enum: [0, 1, 2],
+      enum: [0, 1, 2, 3],
       default: 0
     },
     method: {

@@ -20,4 +20,8 @@ router.route('/driver').get(userController.getAllDriver)
 
 router.route('/hotline').get(userController.getAllHotline)
 
+router.route('/account').get(userController.getAccount)
+
+router.route('/location').get(userController.getLocation)
+
 export default router

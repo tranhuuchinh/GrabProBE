@@ -56,12 +56,40 @@ export default {
         .count()
         .exec()
 
+      // Lấy khách hàng đặt qua ứng dụng trong ngày
+      const totalOrderApp = await OrderModel.find({
+        create_at: {
+          // $gte: currentDate,
+          // $lt: new Date()
+          method: 0,
+          $gte: new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate()),
+          $lt: new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() + 1)
+        }
+      })
+        .count()
+        .exec()
+
+      // Lấy khách hàng đặt qua call center trong ngày
+      const totalOrderCall = await OrderModel.find({
+        create_at: {
+          // $gte: currentDate,
+          // $lt: new Date()
+          method: 0,
+          $gte: new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate()),
+          $lt: new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() + 1)
+        }
+      })
+        .count()
+        .exec()
+
       const ress = {
         totalSale: totalSale,
         totalOrder: totalOrder,
         totalCustomer: totalCustomer,
         totalDriver: totalDriver,
         timeUpdate: currentDate,
+        totalOrderApp: totalOrderApp,
+        totalOrderCall: totalOrderCall,
         yesterday: yesterday
       }
 

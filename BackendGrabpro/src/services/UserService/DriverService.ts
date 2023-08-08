@@ -30,4 +30,12 @@ export default class DriverService {
       throw new Error(e.message)
     }
   }
+
+  public async deleteUser() {
+    try {
+      return await Driver.findByIdAndDelete(this.idAccount).exec()
+    } catch (e: any) {
+      throw new Error(e.message)
+    }
+  }
 }

@@ -8,11 +8,13 @@ import mongoose from 'mongoose'
 import userRoutes from '~/routes/userRoutes'
 import customerRoutes from '~/routes/customerRoutes'
 import messagesRoutes from '~/routes/messagesRoutes'
+import boxchatRoutes from '~/routes/boxchatRoute'
 import orderRoutes from '~/routes/orderRoutes'
 import billRoutes from '~/routes/billsRoute'
 import salesRoute from '~/routes/salesRoute'
 import informsRoute from '~/routes/informsRoute'
 import paymentsRoute from '~/routes/paymentsRoute'
+import authenRoute from '~/routes/authenRoute'
 import driverRoute from '~/routes/driverRoute'
 import homeAdminRoute from '~/routes/homeAdminRoute'
 
@@ -49,7 +51,9 @@ app.use('/bills', billRoutes)
 app.use('/sales', salesRoute)
 app.use('/informs', informsRoute)
 app.use('/payments', paymentsRoute)
+app.use('/auth', authenRoute)
 app.use('/homeAdmin', homeAdminRoute)
+app.use('/boxchat', boxchatRoutes)
 
 /**
  * Server Activation
