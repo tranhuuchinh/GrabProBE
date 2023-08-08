@@ -14,12 +14,9 @@ import billRoutes from '~/routes/billsRoute'
 import salesRoute from '~/routes/salesRoute'
 import informsRoute from '~/routes/informsRoute'
 import paymentsRoute from '~/routes/paymentsRoute'
-<<<<<<< HEAD
 import authenRoute from '~/routes/authenRoute'
-=======
 import driverRoute from '~/routes/driverRoute'
 import homeAdminRoute from '~/routes/homeAdminRoute'
->>>>>>> 364faffe13523431dc4ba4fe2349ee9397fff097
 
 dotenv.config()
 
@@ -54,12 +51,9 @@ app.use('/bills', billRoutes)
 app.use('/sales', salesRoute)
 app.use('/informs', informsRoute)
 app.use('/payments', paymentsRoute)
-<<<<<<< HEAD
 app.use('/auth', authenRoute)
-=======
 app.use('/homeAdmin', homeAdminRoute)
 app.use('/boxchat', boxchatRoutes)
->>>>>>> 364faffe13523431dc4ba4fe2349ee9397fff097
 
 /**
  * Server Activation
