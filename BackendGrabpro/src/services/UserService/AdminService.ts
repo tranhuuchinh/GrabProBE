@@ -22,4 +22,12 @@ export default class AdminService {
       throw new Error(e.message)
     }
   }
+
+  public async getUser() {
+    try {
+      return await Admin.find({}).exec()
+    } catch (e: any) {
+      throw new Error(e.message)
+    }
+  }
 }

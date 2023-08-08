@@ -22,4 +22,20 @@ export default class CustomerService {
       throw new Error(e.message)
     }
   }
+
+  public async getAllUser() {
+    try {
+      return await Customer.find({}).exec()
+    } catch (e: any) {
+      throw new Error(e.message)
+    }
+  }
+
+  public async deleteUser() {
+    try {
+      return await Customer.findByIdAndDelete(this.idAccount).exec()
+    } catch (e: any) {
+      throw new Error(e.message)
+    }
+  }
 }

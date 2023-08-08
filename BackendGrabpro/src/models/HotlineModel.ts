@@ -28,11 +28,6 @@ const HotlineSchema = new mongoose.Schema(
       type: String,
       trim: true
     },
-    listOrder: [
-      {
-        type: mongoose.Types.ObjectId
-      }
-    ],
     favoriteLocations: [
       {
         type: mongoose.Types.ObjectId

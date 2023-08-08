@@ -38,13 +38,18 @@ const OrderSchema = new mongoose.Schema(
       type: mongoose.Types.ObjectId,
       ref: 'Location'
     },
+    type: {
+      type: String,
+      enum: ['GrabCar', 'GrabBike'],
+      default: 'GrabCar'
+    },
     distance: {
       type: String,
       trim: true
     },
     status: {
       type: Number,
-      enum: [0, 1, 2],
+      enum: [0, 1, 2, 3],
       default: 0
     },
     method: {
@@ -52,9 +57,7 @@ const OrderSchema = new mongoose.Schema(
     },
     feedback: {
       type: Number,
-      min: [0, 'Rating must be above 0'],
-      max: [5, 'Rating must be below 5'],
-      default: 1
+      default: 0
     },
     tax: {
       type: Number,

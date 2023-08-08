@@ -22,4 +22,20 @@ export default class HotlineService {
       throw new Error(e.message)
     }
   }
+
+  public async getAllUser() {
+    try {
+      return await Hotline.find({}).exec()
+    } catch (e: any) {
+      throw new Error(e.message)
+    }
+  }
+
+  public async deleteUser() {
+    try {
+      return await Hotline.findByIdAndDelete(this.idAccount).exec()
+    } catch (e: any) {
+      throw new Error(e.message)
+    }
+  }
 }

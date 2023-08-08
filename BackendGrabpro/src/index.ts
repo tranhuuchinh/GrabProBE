@@ -1,18 +1,25 @@
 /**
  * Required External Modules
  */
+import cors from 'cors'
 import express from 'express'
 import dotenv from 'dotenv'
 import mongoose from 'mongoose'
 import userRoutes from '~/routes/userRoutes'
 import customerRoutes from '~/routes/customerRoutes'
 import messagesRoutes from '~/routes/messagesRoutes'
+import boxchatRoutes from '~/routes/boxchatRoute'
 import orderRoutes from '~/routes/orderRoutes'
 import billRoutes from '~/routes/billsRoute'
 import salesRoute from '~/routes/salesRoute'
 import informsRoute from '~/routes/informsRoute'
 import paymentsRoute from '~/routes/paymentsRoute'
+<<<<<<< HEAD
 import authenRoute from '~/routes/authenRoute'
+=======
+import driverRoute from '~/routes/driverRoute'
+import homeAdminRoute from '~/routes/homeAdminRoute'
+>>>>>>> 364faffe13523431dc4ba4fe2349ee9397fff097
 
 dotenv.config()
 
@@ -22,6 +29,13 @@ dotenv.config()
 const PORT: number = 3000
 
 const app = express()
+app.use(
+  cors({
+    origin: '*',
+    credentials: true,
+    methods: ['GET', 'POST', 'PATCH', 'DELETE']
+  })
+)
 
 /**
  *  App Configuration
@@ -33,13 +47,19 @@ app.use(express.json({ limit: '10mb' }))
  */
 app.use('/user', userRoutes)
 app.use('/customer', customerRoutes)
+app.use('/driver', driverRoute)
 app.use('/messages', messagesRoutes)
 app.use('/orders', orderRoutes)
 app.use('/bills', billRoutes)
 app.use('/sales', salesRoute)
 app.use('/informs', informsRoute)
 app.use('/payments', paymentsRoute)
+<<<<<<< HEAD
 app.use('/auth', authenRoute)
+=======
+app.use('/homeAdmin', homeAdminRoute)
+app.use('/boxchat', boxchatRoutes)
+>>>>>>> 364faffe13523431dc4ba4fe2349ee9397fff097
 
 /**
  * Server Activation
