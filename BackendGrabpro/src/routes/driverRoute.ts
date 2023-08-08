@@ -3,7 +3,7 @@ import driverController from '~/controllers/driverController'
 
 const router = express.Router()
 
-// Get profile customer
+// Get profile driver
 router.route('/:id').get(driverController.getDriver)
 
 export default router
