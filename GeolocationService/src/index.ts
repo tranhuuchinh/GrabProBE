@@ -9,9 +9,8 @@ import userRoutes from '~/routes/userRoutes'
 import customerRoutes from '~/routes/customerRoutes'
 import orderRoutes from '~/routes/orderRoutes'
 import driverRoute from '~/routes/driverRoute'
-import callcenterRoute from '~/routes/callcenterRoutes'
 import { setupMediator } from './services/CallCenterService/mediator'
-import RideStatusService from './services/CallCenterService/RideStatusService'
+import GeolocationService from './services/CallCenterService/GeolocationService'
 import SocketManager from './services/socket'
 
 dotenv.config()
@@ -19,7 +18,7 @@ dotenv.config()
 /**
  * App Variables
  */
-const PORT: number = 3003
+const PORT: number = 3005
 
 const app = express()
 app.use(
@@ -42,17 +41,13 @@ app.use('/user', userRoutes)
 app.use('/customer', customerRoutes)
 app.use('/driver', driverRoute)
 app.use('/orders', orderRoutes)
-app.use('/callcenter', callcenterRoute)
 
 const startApp = async () => {
   const queueNameGeolocation = 'geolocation_queue'
-  const queueNameCoordinator = 'coordinator_queue'
-  const queueNameRideStatus = 'ride_status_queue'
 
-  // Khởi tạo kết nối RabbitMQ
-  const { channel } = await setupMediator([queueNameRideStatus, queueNameGeolocation, queueNameCoordinator])
+  const { channel } = await setupMediator([queueNameGeolocation])
 
-  RideStatusService.startListening(channel, queueNameRideStatus)
+  GeolocationService.startListening(channel, queueNameGeolocation)
 }
 
 startApp()
