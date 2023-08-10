@@ -1,8 +1,14 @@
 import express from 'express'
+import { BaseLogger } from '~/services/ErrorDecorator/BaseLogger'
+import { Logger } from '~/services/ErrorDecorator/Logger'
+import { ErrorLoggerDecorator } from '~/services/ErrorDecorator/LoggerDecorator'
 import AccountModel from '~/models/AccountModel'
 import LocationModel from '~/models/LocationModel'
 import UserFactory from '~/services/UserService/UserFactory'
 import { catchAsync } from '~/utils/catchAsync'
+
+const baseLogger: Logger = new BaseLogger()
+const errorLogger: Logger = new ErrorLoggerDecorator(baseLogger)
 
 export default {
   createCustomer: catchAsync(async (req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -16,6 +22,7 @@ export default {
         data: user
       })
     } catch (error: any) {
+      errorLogger.log(error.message)
       res.status(500).json({
         status: 'error',
         message: error.message
