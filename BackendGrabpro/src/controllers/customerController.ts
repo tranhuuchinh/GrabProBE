@@ -1,10 +1,16 @@
 import express from 'express'
+import { BaseLogger } from '~/services/ErrorDecorator/BaseLogger'
+import { Logger } from '~/services/ErrorDecorator/Logger'
+import { ErrorLoggerDecorator } from '~/services/ErrorDecorator/LoggerDecorator'
 import { catchAsync } from '~/utils/catchAsync'
 import CustomerModel from '~/models/CustomerModel'
 import AccountModel from '~/models/AccountModel'
 import AwardModel from '~/models/AwardModel'
 import { CustomerRepository } from '~/services/CustomerService/CustomerRepository'
 import { BonusRepository } from '~/services/CustomerService/BonusRepository'
+
+const baseLogger: Logger = new BaseLogger()
+const errorLogger: Logger = new ErrorLoggerDecorator(baseLogger)
 
 export default {
   getCustomer: catchAsync(async (req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -18,6 +24,7 @@ export default {
         .exec()
 
       if (!customer) {
+        errorLogger.log('No customer found' + ' in ' + req.url)
         return res.status(404).json({
           status: 'error',
           message: 'No customer found'
@@ -53,6 +60,7 @@ export default {
         data: customerWithPhoneAndEmail
       })
     } catch (error: any) {
+      errorLogger.log(error.message + ' in ' + req.url)
       res.status(500).json({
         status: 'error',
         message: error.message
@@ -72,6 +80,7 @@ export default {
         req.body.phone
       )
       if (!customer) {
+        errorLogger.log('No customer with id' + ' in ' + req.url)
         return res.status(404).json({
           status: 'error',
           message: 'No customer with id'
@@ -82,6 +91,7 @@ export default {
         data: { customer, account }
       })
     } catch (error: any) {
+      errorLogger.log(error.message + ' in ' + req.url)
       res.status(500).json({
         status: 'error',
         message: error.message
@@ -97,6 +107,7 @@ export default {
     try {
       const customer = await bonusRepository.updateBonusPoint(id, bonusPoint)
       if (!customer) {
+        errorLogger.log('No customer with id' + ' in ' + req.url)
         return res.status(404).json({
           status: 'error',
           message: 'No customer with id'
@@ -107,6 +118,7 @@ export default {
         data: customer
       })
     } catch (error: any) {
+      errorLogger.log(error.message + ' in ' + req.url)
       res.status(500).json({
         status: 'error',
         message: error.message

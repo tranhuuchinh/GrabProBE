@@ -1,4 +1,3 @@
-// customer.repository.ts
 import { Model } from 'mongoose'
 import { ICustomer } from '~/models/CustomerModel'
 
