@@ -8,19 +8,21 @@ export default {
       const customerData = req.body
       const address = customerData.address
 
-      if (address !== '') {
-        if (address !== 'SEARCH') {
-          // Thông tin địa điểm đón khách hàng cung cấp đã được định vị
-          // Chuyển sang điều phối
-          publishToMediator({
-            type: 'TRANSPORT_COORDINATATION',
-            data: customerData
-          })
-        } else {
-          // Đưa sang định vị
-          publishToMediator({ type: 'CUSTOMER_REQUESTED', data: customerData })
-        }
-      }
+      // if (address !== '') {
+      //   if (address !== 'SEARCH') {
+      //     // Thông tin địa điểm đón khách hàng cung cấp đã được định vị
+      //     // Chuyển sang điều phối
+      //     publishToMediator({
+      //       type: 'GEOLOCATION_RESOLVED',
+      //       data: customerData
+      //     })
+      //   } else {
+      //     // Đưa sang định vị
+      //     publishToMediator({ type: 'CUSTOMER_REQUESTED', data: customerData })
+      //   }
+      // }
+      console.log(123445677)
+      publishToMediator({ type: 'CUSTOMER_REQUESTED', data: customerData })
 
       res.status(200).json({
         status: 'success',
