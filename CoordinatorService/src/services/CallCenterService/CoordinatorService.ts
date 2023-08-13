@@ -15,6 +15,18 @@ class CoordinatorService {
 
             // publishToMediator({ type: 'COORDINATOR_RESOLVED', data: message.data })
             publishToMediator({ type: 'RIDE_STATUS_UPDATED', data: 'COORDINATOR_RESOLVED' })
+
+            // 1. Nhận thông tin tài xế từ Customer Server và push qua Driver Server để tìm tài xế
+            publishToMediator({ type: 'DRIVER_RECEIVED', data: '' })
+
+            // 2. Nhận được list Drivers tính toán những gần nhất gửi về cho Customer Server
+            publishToMediator({ type: 'CUSTOMER_RECEIVED', data: '' })
+
+            // 3. Xác nhận thằng gần nhất để gửi về Customer Server
+            publishToMediator({ type: 'CUSTOMER_RECEIVED', data: '' })
+
+            // 4. Nhận được hủy đơn từ thằng gần nhất gửi tìm lại
+            publishToMediator({ type: 'DRIVER_RECEIVED', data: '' })
             channel.ack(msg)
           }
         }
