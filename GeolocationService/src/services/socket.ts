@@ -1,6 +1,7 @@
 import { Server, Socket } from 'socket.io'
 import http from 'http'
 import { publishToMediator } from './CallCenterService/mediator'
+import ElasticsearchService from './ElasticsearchService'
 
 enum ClientStatus {
   IDLE = 'idle',
@@ -31,9 +32,15 @@ class SocketManager {
 
       this.connectedClients.set(socket.id, clientInfo)
 
-      socket.on('clientGeolocationResolved', (message: any) => {
+      socket.on('clientGeolocationResolved', async (message: any) => {
         console.log('Message from clientGeolocationResolved:', message)
         this.setClientStatus(socket.id, ClientStatus.IDLE)
+
+        const elasticsearchService = ElasticsearchService.getInstance()
+        const indexStart = await elasticsearchService.createIndex(message?.data?.addressStart)
+        const indexEnd = await elasticsearchService.createIndex(message?.data?.addressEnd)
+        if (indexStart != '') await elasticsearchService.addDocument(indexStart, message?.data?.geocodeStart)
+        if (indexEnd != '') await elasticsearchService.addDocument(indexEnd, message?.data?.geocodeEnd)
 
         publishToMediator({ type: 'GEOLOCATION_RESOLVED', data: message.data, geolocation: message.geolocation })
       })
@@ -52,13 +59,16 @@ class SocketManager {
     return SocketManager.instance
   }
 
-  sendBroadcastGeolocaion(data: any): void {
+  sendBroadcastGeolocaion(data: any): boolean {
+    let check: boolean = false
     this.connectedClients.forEach((clientInfo) => {
-      if (clientInfo.status === ClientStatus.IDLE) {
+      if (!check && clientInfo.status === ClientStatus.IDLE) {
         clientInfo.socket.emit('GEOLOCATION_CLIENT', data)
         clientInfo.status = ClientStatus.BUSY
+        check = true
       }
     })
+    return check
   }
 
   getSocketIOInstance(): Server {
