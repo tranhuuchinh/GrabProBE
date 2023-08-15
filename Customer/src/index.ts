@@ -13,6 +13,9 @@ import billRoutes from '~/routes/billsRoute'
 import salesRoute from '~/routes/salesRoute'
 import informsRoute from '~/routes/informsRoute'
 import paymentsRoute from '~/routes/paymentsRoute'
+import SocketManager from './services/socket'
+import { setupMediator } from './services/ChannelService/mediator'
+import CustomerStatusService from './services/ChannelService/CustomerStatusService'
 
 dotenv.config()
 
@@ -47,12 +50,25 @@ app.use('/informs', informsRoute)
 app.use('/payments', paymentsRoute)
 app.use('/boxchat', boxchatRoutes)
 
+const startApp = async () => {
+  const queueNameCustomer = 'customer_queue'
+
+  const { channel } = await setupMediator([queueNameCustomer])
+
+  CustomerStatusService.startListening(channel, queueNameCustomer)
+}
+
+startApp()
+
 /**
  * Server Activation
  */
 const server = app.listen(PORT, () => {
   console.log(`Listening on port ${PORT}`)
 })
+
+// SOCKET
+export const socketManager = SocketManager.getInstance(server)
 
 process.on('uncaughtException', (err) => {
   console.log('Uncaught Exception. Shutting down...')

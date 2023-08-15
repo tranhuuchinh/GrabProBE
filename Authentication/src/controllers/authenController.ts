@@ -47,40 +47,26 @@ const signToken = (phone: string, expires: string | null = null) => {
   })
 }
 
-const createSendToken = async (user: any, statusCode: number, req: any, res: any) => {
-  const cookies = req?.cookies
-
-  const token = signToken(user.phone)
-  const newRefreshToken = signToken(user.phone, 'refresh')
-
-  if (process.env.NODE_ENV === 'production') cookieOptions.secure = true
+const createSendToken = async (user: any) => {
+  const token = signToken(user.phone);
+  const newRefreshToken = signToken(user.phone, 'refresh');
 
   // Save refresh token to DB
-  const newRefreshTokenArray = !cookies?.jwt
-    ? user.refreshToken
-    : user.refreshToken.filter((rt: any) => rt !== cookies.jwt)
+  // user.refreshToken.push(newRefreshToken);
 
-  if (cookies?.jwt) {
-    res.clearCookie('jwt', { httpOnly: true, sameSite: 'None', secure: true })
-  }
-  user.refreshToken = [...newRefreshTokenArray, newRefreshToken]
+  const result = await user.save();
 
-  const result = await user.save()
+  // Remove sensitive data from output
+  user.password = undefined;
+  user.refreshToken = undefined;
 
-  // Remove password from output
-  user.password = undefined
-  user.refreshToken = undefined
-
-  res.cookie('jwt', newRefreshToken, cookieOptions)
-
-  res.status(statusCode).json({
-    status: 'success',
+  return {
     access_token: token,
-    data: {
-      user
-    }
-  })
-}
+    refresh_token: newRefreshToken,
+    user,
+  };
+};
+
 
 export default {
   login: catchAsync(async (req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -108,12 +94,12 @@ export default {
     }
 
     // TOKEN
+    const dataRegis = await createSendToken(user);
+    console.log(dataRegis);
 
     res.status(200).json({
       status: 'success',
-      access_token: '',
-      refresh_token: '',
-      data: user
+      dataRegis
     })
   })
 }
