@@ -1,4 +1,5 @@
 import express from 'express'
+import { Request, Response, NextFunction } from 'express'
 import UserFactory from '~/services/UserService/UserFactory'
 import { catchAsync } from '~/utils/catchAsync'
 import crypto from 'crypto'
@@ -8,6 +9,10 @@ import jwt, { Secret } from 'jsonwebtoken'
 import firebase from '~/configs/firebase'
 // Đảm bảo đã cài đặt thư viện dotenv để đọc các biến môi trường từ tệp .env
 import dotenv from 'dotenv'
+import IAccount from '../models/AccountModel'
+import { AuthStrategy, PhoneAuthStrategy, GoogleAuthStrategy } from '../services/AuthService/authStrategies'
+import AuthProcessor from '../services/AuthService/authProcessor'
+import { createSendToken } from '../utils/token'
 
 dotenv.config()
 
@@ -31,55 +36,57 @@ const cookieOptions = {
   secure: true
 }
 
-const base64_encode = (path: string, root = '') => {
-  const ext = path.substring(path.lastIndexOf('.')).split('.')[1]
-  const base64 = fs.readFileSync(`${root}${path}`, 'base64')
+const phoneAuthStrategy = new PhoneAuthStrategy()
+const googleAuthStrategy = new GoogleAuthStrategy()
 
-  return `data:${ext};base64,${base64}`
-}
+// const base64_encode = (path: string, root = '') => {
+//   const ext = path.substring(path.lastIndexOf('.')).split('.')[1]
+//   const base64 = fs.readFileSync(`${root}${path}`, 'base64')
 
-const signToken = (phone: string, expires: string | null = null) => {
-  const secret: Secret = !expires ? process.env.ACCESS_TOKEN_SECRET || '' : process.env.REFRESH_TOKEN_SECRET || ''
-  const expiresIn: string = !expires ? process.env.JWT_EXPIRES_IN || '30m' : process.env.JWT_EXPIRES_IN_REFRESH || '1d'
-
-  return jwt.sign({ phone }, secret, {
-    expiresIn: expiresIn
-  })
-}
-
-const createSendToken = async (user: any) => {
-  const token = signToken(user.phone);
-  const newRefreshToken = signToken(user.phone, 'refresh');
-
-  // Save refresh token to DB
-  // user.refreshToken.push(newRefreshToken);
-
-  const result = await user.save();
-
-  // Remove sensitive data from output
-  user.password = undefined;
-  user.refreshToken = undefined;
-
-  return {
-    access_token: token,
-    refresh_token: newRefreshToken,
-    user,
-  };
-};
-
+//   return `data:${ext};base64,${base64}`
+// }
 
 export default {
   login: catchAsync(async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    const loginType = req.query.by
+    const loginType = req.body.loginType //.....
     const data = req.body
 
-    res.status(200).json({
-      status: 'success',
-      access_token: '',
-      refresh_token: '',
-      data: data
-    })
+    let strategy: AuthStrategy | null = null // Khởi tạo với giá trị mặc định null
+
+    if (loginType === 'phone') {
+      strategy = phoneAuthStrategy
+      console.log('phone')
+    } else if (loginType === 'google') {
+      strategy = googleAuthStrategy
+      console.log('google')
+    } else {
+      // Xử lý các loại đăng nhập khác (nếu có)
+    }
+
+    if (strategy) {
+      // Kiểm tra xem strategy đã được gán giá trị chưa
+      const loginProcessor = new AuthProcessor(strategy)
+
+      try {
+        const tokens = await loginProcessor.login(data)
+
+        res.status(200).json({
+          status: 'success',
+          access_token: tokens.access_token,
+          refresh_token: tokens.refresh_token,
+          data: tokens.user
+        })
+      } catch (error) {
+        next(error)
+      }
+    } else {
+      res.status(400).json({
+        status: 'fail',
+        message: 'Loại đăng nhập không hợp lệ'
+      })
+    }
   }),
+
   register: catchAsync(async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     const role = req.body.role
     const phone = req.body.phone
@@ -94,8 +101,8 @@ export default {
     }
 
     // TOKEN
-    const dataRegis = await createSendToken(user);
-    console.log(dataRegis);
+    const dataRegis = await createSendToken(user)
+    console.log(dataRegis)
 
     res.status(200).json({
       status: 'success',
