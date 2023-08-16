@@ -13,7 +13,7 @@ class RideStatusService {
           if (message.type === 'RIDE_STATUS_UPDATED') {
             console.log('ride', message)
             // Gửi socket về cho bộ phận S3 theo dõi đơn hàng
-            socketManager.sendBroadcastToClient('FOLLOW_ORDER_CLIENT', 'Đơn hàng mới')
+            socketManager.sendBroadcastToClient('FOLLOW_ORDER_CLIENT', message.data)
 
             channel.ack(msg)
           }

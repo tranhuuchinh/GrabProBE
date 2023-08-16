@@ -1,7 +1,6 @@
 import { Server, Socket } from 'socket.io'
 import http from 'http'
-import { publishToMediator } from './CallCenterService/mediator'
-import ElasticsearchService from './ElasticsearchService'
+import { publishToMediator } from './ChannelService/mediator'
 
 enum ClientStatus {
   IDLE = 'idle',
@@ -32,23 +31,12 @@ class SocketManager {
 
       this.connectedClients.set(socket.id, clientInfo)
 
-      socket.on('customerBooking', async (message: any) => {
-        console.log('Message from customerBooking:', message)
-        // Check địa chỉ đã được định vị bằng Elastic-Search
-        const elasticsearchService = ElasticsearchService.getInstance()
-        const geocodeStart = await elasticsearchService.search(message.addressStart, '*')
-        const geocodeEnd = await elasticsearchService.search(message.addressEnd, '*')
-        if (geocodeStart.length) {
-          message.geocodeStart = geocodeStart[0]._source
-        }
-        if (geocodeEnd.length) {
-          message.geocodeEnd = geocodeEnd[0]._source
-        }
-        console.log(geocodeStart)
-        console.log(geocodeEnd)
-
-        if (geocodeStart.length && geocodeEnd.length) publishToMediator({ type: 'GEOLOCATION_RESOLVED', data: message })
-        else publishToMediator({ type: 'CUSTOMER_REQUESTED', data: message })
+      socket.on('customerClient', (message: any) => {
+        console.log('Message from customer:', message)
+        // Message là Object inform từ khách hàng gửi sang => Địa điểm khách hàng
+        // 1. Tạo order ko tài xế
+        // 2. Publish qua cho Cordinator xử lí kiếm tài xế (data là địa điểm khách hàng)
+        publishToMediator({ type: 'GEOLOCATION_RESOLVED', data: 'FIND DRIVER' + message })
       })
 
       socket.on('disconnect', () => {
@@ -80,24 +68,6 @@ class SocketManager {
 
     if (clientInfo) {
       clientInfo.socket.emit(channel, message)
-    }
-  }
-
-  getClientStatus(clientId: string): ClientStatus | undefined {
-    const clientInfo = this.connectedClients.get(clientId)
-
-    if (clientInfo) {
-      return clientInfo.status
-    }
-
-    return undefined
-  }
-
-  setClientStatus(clientId: string, status: ClientStatus) {
-    const clientInfo = this.connectedClients.get(clientId)
-
-    if (clientInfo) {
-      clientInfo.status = status
     }
   }
 }

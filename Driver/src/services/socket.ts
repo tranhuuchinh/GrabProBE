@@ -1,7 +1,6 @@
 import { Server, Socket } from 'socket.io'
 import http from 'http'
-import { publishToMediator } from './CallCenterService/mediator'
-import ElasticsearchService from './ElasticsearchService'
+import { publishToMediator } from './DriverChannel/mediator'
 
 enum ClientStatus {
   IDLE = 'idle',
@@ -11,6 +10,7 @@ enum ClientStatus {
 interface ClientInfo {
   socket: Socket
   status: ClientStatus
+  idAccount: string
 }
 
 class SocketManager {
@@ -27,28 +27,35 @@ class SocketManager {
 
       const clientInfo: ClientInfo = {
         socket,
-        status: ClientStatus.IDLE
+        status: ClientStatus.IDLE,
+        idAccount: ''
       }
 
       this.connectedClients.set(socket.id, clientInfo)
 
-      socket.on('customerBooking', async (message: any) => {
-        console.log('Message from customerBooking:', message)
-        // Check địa chỉ đã được định vị bằng Elastic-Search
-        const elasticsearchService = ElasticsearchService.getInstance()
-        const geocodeStart = await elasticsearchService.search(message.addressStart, '*')
-        const geocodeEnd = await elasticsearchService.search(message.addressEnd, '*')
-        if (geocodeStart.length) {
-          message.geocodeStart = geocodeStart[0]._source
-        }
-        if (geocodeEnd.length) {
-          message.geocodeEnd = geocodeEnd[0]._source
-        }
-        console.log(geocodeStart)
-        console.log(geocodeEnd)
+      socket.on('setID', (idFromClient: any) => {
+        console.log('ID from driver:', idFromClient)
+        this.connectedClients.set(socket.id, { socket, status: ClientStatus.IDLE, idAccount: idFromClient })
 
-        if (geocodeStart.length && geocodeEnd.length) publishToMediator({ type: 'GEOLOCATION_RESOLVED', data: message })
-        else publishToMediator({ type: 'CUSTOMER_REQUESTED', data: message })
+        const clientInfo: ClientInfo = {
+          socket,
+          status: ClientStatus.IDLE,
+          idAccount: idFromClient
+        }
+
+        this.connectedClients.set(socket.id, clientInfo)
+      })
+
+      socket.on('driverClient', (message: any) => {
+        console.log('Message from driver:', message)
+        // Gửi tin nhắn cho client sau khi gán idAccount
+        this.emitMessage('IdAccount', 'driverClient', 'Bố m trả lời nè')
+
+        // 1. Tính toán khoảng cách ở dưới Client xong gửi lên cho Coordinator và kiểm tra <4km
+        // publishToMediator({ type: 'GEOLOCATION_RESOLVED', data: 'SEND DISTANCE' + message })
+
+        // 2. Hủy đơn
+        // publishToMediator({ type: 'GEOLOCATION_RESOLVED', data: 'CANCEL ORDER' })
       })
 
       socket.on('disconnect', () => {
@@ -75,12 +82,12 @@ class SocketManager {
     return this.io
   }
 
-  emitMessage(clientId: string, channel: string, message: any) {
-    const clientInfo = this.connectedClients.get(clientId)
-
-    if (clientInfo) {
-      clientInfo.socket.emit(channel, message)
-    }
+  emitMessage(idAccount: string, channel: string, message: any) {
+    this.connectedClients.forEach((clientInfo) => {
+      if (clientInfo.idAccount === idAccount) {
+        clientInfo.socket.emit(channel, message)
+      }
+    })
   }
 
   getClientStatus(clientId: string): ClientStatus | undefined {
