@@ -27,7 +27,6 @@ const AccountSchema = new mongoose.Schema(
     password: {
       type: String,
       required: [true, 'Password must not empty'],
-      select: false,
       trim: true
     },
     role: {
