@@ -1,6 +1,7 @@
 import { Server, Socket } from 'socket.io'
 import http from 'http'
 import { publishToMediator } from './DriverChannel/mediator'
+import OrderModel from '~/models/OrderModel'
 
 enum ClientStatus {
   IDLE = 'idle',
@@ -36,14 +37,6 @@ class SocketManager {
       socket.on('setID', (idFromClient: any) => {
         console.log('ID from driver:', idFromClient)
         this.connectedClients.set(socket.id, { socket, status: ClientStatus.IDLE, idAccount: idFromClient })
-
-        const clientInfo: ClientInfo = {
-          socket,
-          status: ClientStatus.IDLE,
-          idAccount: idFromClient
-        }
-
-        this.connectedClients.set(socket.id, clientInfo)
       })
 
       socket.on('driverClient', (message: any) => {
@@ -53,7 +46,20 @@ class SocketManager {
 
         // 1. Tính toán khoảng cách ở dưới Client xong gửi lên cho Coordinator và kiểm tra <4km
         // publishToMediator({ type: 'GEOLOCATION_RESOLVED', data: 'SEND DISTANCE' + message })
+      })
+      socket.on('acceptOrder', (inforDriver: any) => {
+        // Update Driver for Order
+        OrderModel.findByIdAndUpdate(inforDriver.idOrder, { idDriver: inforDriver.idUser }, { new: true })
+          .then((updatedOrder) => {
+            console.log(updatedOrder)
 
+            //Sang Coordinate xóa stack có idOrder đấy đi
+          })
+          .catch((error) => {
+            console.error('Error updating order:', error)
+          })
+      })
+      socket.on('cancelOrder', (inforDriver: any) => {
         // 2. Hủy đơn
         // publishToMediator({ type: 'GEOLOCATION_RESOLVED', data: 'CANCEL ORDER' })
       })

@@ -46,6 +46,7 @@
     "firebase-admin": "^11.10.1",
     "jsonwebtoken": "^9.0.1",
     "mongoose": "^7.4.1",
+    "short-uuid": "^4.2.2",
     "socket.io": "^4.7.2"
   }
 }

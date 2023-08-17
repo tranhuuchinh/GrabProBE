@@ -18,6 +18,12 @@ class DriverStatusService {
             // socketManager.emitMessage()
 
             channel.ack(msg)
+          } else if (message.type === 'DRIVER_FIND_DRIVER') {
+            console.log(message.data)
+            // 1. Nhận thông tin khách hàng từ Coordinator gửi về tất cả tài xế
+            socketManager.sendBroadcastToClient('driverClient', message.data)
+
+            channel.ack(msg)
           }
         }
       },

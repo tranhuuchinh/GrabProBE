@@ -50,15 +50,15 @@ app.use('/informs', informsRoute)
 app.use('/payments', paymentsRoute)
 app.use('/boxchat', boxchatRoutes)
 
-// const startApp = async () => {
-//   const queueNameDriver = 'driver_queue'
+const startApp = async () => {
+  const queueNameDriver = 'driver_queue'
 
-//   const { channel } = await setupMediator([queueNameDriver])
+  const { channel } = await setupMediator([queueNameDriver])
 
-//   DriverStatusService.startListening(channel, queueNameDriver)
-// }
+  DriverStatusService.startListening(channel, queueNameDriver)
+}
 
-// startApp()
+startApp()
 
 /**
  * Server Activation
