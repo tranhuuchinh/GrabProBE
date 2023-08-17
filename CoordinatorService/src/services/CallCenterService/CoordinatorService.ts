@@ -14,7 +14,7 @@ class CoordinatorService {
             // Tiến hành điều phối xe
 
             // publishToMediator({ type: 'COORDINATOR_RESOLVED', data: message.data })
-            publishToMediator({ type: 'RIDE_STATUS_UPDATED', data: 'COORDINATOR_RESOLVED' })
+            publishToMediator({ type: 'RIDE_STATUS_UPDATED', data: message })
 
             // 1. Nhận thông tin khách hàng từ Customer Server và push qua Driver Server để tìm tài xế
             publishToMediator({ type: 'DRIVER_RECEIVED_CUSTOMER', data: '' })

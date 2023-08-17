@@ -1,6 +1,8 @@
 import { Server, Socket } from 'socket.io'
 import http from 'http'
 import { publishToMediator } from './CallCenterService/mediator'
+import ElasticsearchService from './ElasticsearchService'
+import UserFactory from './UserService/UserFactory'
 
 enum ClientStatus {
   IDLE = 'idle',
@@ -31,11 +33,39 @@ class SocketManager {
 
       this.connectedClients.set(socket.id, clientInfo)
 
-      socket.on('customerBooking', (message: any) => {
+      socket.on('customerBooking', async (message: any) => {
         console.log('Message from customerBooking:', message)
-        // Check địa chỉ đã được định vị
+        // Check địa chỉ đã được định vị bằng Elastic-Search
+        const elasticsearchService = ElasticsearchService.getInstance()
+        const geocodeStart = await elasticsearchService.search(message.addressStart, '*')
+        const geocodeEnd = await elasticsearchService.search(message.addressEnd, '*')
+        if (geocodeStart.length) {
+          message.geocodeStart = geocodeStart[0]._source
+        }
+        if (geocodeEnd.length) {
+          message.geocodeEnd = geocodeEnd[0]._source
+        }
 
-        publishToMediator({ type: 'CUSTOMER_REQUESTED', data: message })
+        if (geocodeStart.length && geocodeEnd.length) {
+          try {
+            const user = await UserFactory.createUser(
+              'hotline',
+              '',
+              message?.data?.phone,
+              (Math.random() * 1000).toString(),
+              message?.data?.name || ''
+            )
+
+            message.data.user = user
+
+            publishToMediator({ type: 'GEOLOCATION_RESOLVED', data: message.data, geolocation: message.geolocation })
+          } catch (e) {
+            console.log(e)
+          }
+          publishToMediator({ type: 'GEOLOCATION_RESOLVED', data: message })
+        } else {
+          publishToMediator({ type: 'CUSTOMER_REQUESTED', data: message })
+        }
       })
 
       socket.on('disconnect', () => {
