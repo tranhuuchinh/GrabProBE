@@ -1,4 +1,5 @@
-import mongoose, { Document, Types } from 'mongoose'
+import mongoose, { CallbackError, Document, Types } from 'mongoose'
+import shortUUID from 'short-uuid'
 
 export interface IOrder extends Document {
   code: string
@@ -40,8 +41,8 @@ const OrderSchema = new mongoose.Schema(
     },
     type: {
       type: String,
-      enum: ['GrabCar', 'GrabBike'],
-      default: 'GrabCar'
+      enum: ['motobike', '4seats', '7seats'],
+      default: 'motobike'
     },
     distance: {
       type: String,
@@ -81,5 +82,18 @@ const OrderSchema = new mongoose.Schema(
   },
   { timestamps: true }
 )
+
+OrderSchema.pre<IOrder>('save', async function (next) {
+  try {
+    const short = shortUUID()
+    const shortId = short.new()
+    console.log(shortId)
+    this.code = shortId
+    next()
+  } catch (error) {
+    console.log(error)
+    next()
+  }
+})
 
 export default mongoose.model<IOrder>('Order', OrderSchema)

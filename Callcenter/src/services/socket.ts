@@ -2,6 +2,7 @@ import { Server, Socket } from 'socket.io'
 import http from 'http'
 import { publishToMediator } from './CallCenterService/mediator'
 import ElasticsearchService from './ElasticsearchService'
+import UserFactory from './UserService/UserFactory'
 
 enum ClientStatus {
   IDLE = 'idle',
@@ -44,11 +45,27 @@ class SocketManager {
         if (geocodeEnd.length) {
           message.geocodeEnd = geocodeEnd[0]._source
         }
-        console.log(geocodeStart)
-        console.log(geocodeEnd)
 
-        if (geocodeStart.length && geocodeEnd.length) publishToMediator({ type: 'GEOLOCATION_RESOLVED', data: message })
-        else publishToMediator({ type: 'CUSTOMER_REQUESTED', data: message })
+        if (geocodeStart.length && geocodeEnd.length) {
+          try {
+            const user = await UserFactory.createUser(
+              'hotline',
+              '',
+              message?.data?.phone,
+              (Math.random() * 1000).toString(),
+              message?.data?.name || ''
+            )
+
+            message.data.user = user
+
+            publishToMediator({ type: 'GEOLOCATION_RESOLVED', data: message.data, geolocation: message.geolocation })
+          } catch (e) {
+            console.log(e)
+          }
+          publishToMediator({ type: 'GEOLOCATION_RESOLVED', data: message })
+        } else {
+          publishToMediator({ type: 'CUSTOMER_REQUESTED', data: message })
+        }
       })
 
       socket.on('disconnect', () => {
