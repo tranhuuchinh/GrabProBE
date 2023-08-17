@@ -1,6 +1,7 @@
 import { Server, Socket } from 'socket.io'
 import http from 'http'
 import { publishToMediator } from './ChannelService/mediator'
+import OrderModel from '~/models/OrderModel'
 
 enum ClientStatus {
   IDLE = 'idle',
@@ -35,6 +36,14 @@ class SocketManager {
         console.log('Message from customer:', message)
         // Message là Object inform từ khách hàng gửi sang => Địa điểm khách hàng
         // 1. Tạo order ko tài xế
+        const newOrderNoDriver = new OrderModel({
+          username: 'john_doe',
+          fullname: 'John Doe',
+          phone: '123456789'
+        })
+
+        newOrderNoDriver.save()
+
         // 2. Publish qua cho Cordinator xử lí kiếm tài xế (data là địa điểm khách hàng)
         publishToMediator({ type: 'GEOLOCATION_RESOLVED', data: 'FIND DRIVER' + message })
       })
