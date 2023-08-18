@@ -102,7 +102,7 @@ class SocketManager {
 
               // 2. Publish qua cho Cordinator xử lí kiếm tài xế (data là địa điểm khách hàng)
               const inforData = {
-                idUser: inforCustomer.idUser,
+                idCustomer: inforCustomer.idUser,
                 lat: inforCustomer.from.lat,
                 lon: inforCustomer.from.lng,
                 idOrder: savedOrder._id

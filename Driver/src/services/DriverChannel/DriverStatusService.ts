@@ -1,5 +1,4 @@
 import * as amqp from 'amqplib/callback_api'
-import { publishToMediator } from './mediator'
 import { socketManager } from '~/index'
 
 class DriverStatusService {
@@ -10,18 +9,16 @@ class DriverStatusService {
       (msg: any) => {
         if (msg && msg.content) {
           const message = JSON.parse(msg.content.toString())
-          if (message.type === 'DRIVER_RECEIVED') {
-            console.log(message)
-            // 1. Nhận thông tin khách hàng từ Coordinator gửi về tất cả tài xế
-            // socketManager.sendBroadcastToClient()
-            // 2. Coordinator tính toán được tài xế có ngắn nhất để gửi về tài xế đó kèm với idsocket
-            // socketManager.emitMessage()
-
-            channel.ack(msg)
-          } else if (message.type === 'DRIVER_FIND_DRIVER') {
+          if (message.type === 'DRIVER_FIND_DRIVER') {
             console.log(message.data)
             // 1. Nhận thông tin khách hàng từ Coordinator gửi về tất cả tài xế
             socketManager.sendBroadcastToClient('driverClient', message.data)
+
+            channel.ack(msg)
+          } else if (message.type === 'DRIVER_EMIT_DRIVER') {
+            console.log(message.data)
+            // 2. Coordinator tính toán được tài xế có ngắn nhất để gửi về tài xế đó kèm với idOrder
+            socketManager.emitMessage(message.data?.idDriver, 'requestOrder', message.data.idOrder)
 
             channel.ack(msg)
           }
