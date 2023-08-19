@@ -105,7 +105,8 @@ class SocketManager {
                 idCustomer: inforCustomer.idUser,
                 lat: inforCustomer.from.lat,
                 lon: inforCustomer.from.lng,
-                idOrder: savedOrder._id
+                idOrder: savedOrder._id,
+                type: inforCustomer.type
               }
 
               publishToMediator({ type: 'COORDINATION_FIND_DRIVER', data: inforData })

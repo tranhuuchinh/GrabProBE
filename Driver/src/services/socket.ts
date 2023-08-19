@@ -13,6 +13,7 @@ interface ClientInfo {
   socket: Socket
   status: ClientStatus
   idAccount: string
+  type: string
 }
 
 class SocketManager {
@@ -31,14 +32,19 @@ class SocketManager {
       const clientInfo: ClientInfo = {
         socket,
         status: ClientStatus.IDLE,
-        idAccount: ''
+        idAccount: '',
+        type: ''
       }
 
       this.connectedClients.set(socket.id, clientInfo)
 
-      socket.on('setID', (idFromClient: any) => {
-        console.log('ID from driver:', idFromClient)
-        this.connectedClients.set(socket.id, { socket, status: ClientStatus.IDLE, idAccount: idFromClient })
+      socket.on('setID', (inforDriver: any) => {
+        this.connectedClients.set(socket.id, {
+          socket,
+          status: ClientStatus.IDLE,
+          idAccount: inforDriver.idAccount,
+          type: inforDriver.type
+        })
       })
 
       socket.on('driverClient', (inforDriver: any) => {
@@ -133,6 +139,14 @@ class SocketManager {
   emitMessage(idAccount: string, channel: string, message: any) {
     this.connectedClients.forEach((clientInfo) => {
       if (clientInfo.idAccount === idAccount) {
+        clientInfo.socket.emit(channel, message)
+      }
+    })
+  }
+
+  sendBroadcastWithType(type: string, channel: string, message: any) {
+    this.connectedClients.forEach((clientInfo) => {
+      if (clientInfo.type === type) {
         clientInfo.socket.emit(channel, message)
       }
     })

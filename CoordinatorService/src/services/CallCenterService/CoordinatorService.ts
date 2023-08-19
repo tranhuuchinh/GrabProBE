@@ -86,8 +86,17 @@ class CoordinatorService {
             }
             channel.ack(msg)
           } else if (message.type === 'COORDINATION_ACCEPT_REQUEST') {
-            // 4. Tài xế đã nhận lên đây xóa cái data với order đó trong store đó đi
+            // 4. Tài xế đã nhận lên đây xóa order đó trong store đồng thời xóa luôn tài xế đó
+            // ra khỏi hàng chờ các đơn hàng khác
             // data là idOrder, idDriver, idCustomer
+            for (const orderId in this.orderDriverInfoStore) {
+              if (orderId !== message.data.idOrder) {
+                this.orderDriverInfoStore[orderId] = this.orderDriverInfoStore[orderId].filter(
+                  (driver: Driver) => driver.idDriver !== message.data.idDriver
+                )
+              }
+            }
+
             this.orderDriverInfoStore[message.data.idOrder].shift()
             channel.ack(msg)
           } else if (message.type === 'COORDINATION_DENY_REQUEST') {
