@@ -48,8 +48,10 @@ const googleAuthStrategy = new GoogleAuthStrategy()
 
 export default {
   login: catchAsync(async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    const loginType = req.body.loginType //.....
+    const loginType = req.body.loginType
+    const role = req.query.role
     const data = req.body
+    console.log('Role server: ' + role)
 
     let strategy: AuthStrategy | null = null // Khởi tạo với giá trị mặc định null
 
@@ -68,7 +70,7 @@ export default {
       const loginProcessor = new AuthProcessor(strategy)
 
       try {
-        const tokens = await loginProcessor.login(data)
+        const tokens = await loginProcessor.login(data, role)
 
         res.status(200).json({
           status: 'success',
