@@ -37,6 +37,7 @@
   },
   "dependencies": {
     "@types/cors": "^2.8.13",
+    "@vonage/server-sdk": "^3.8.1",
     "amqplib": "^0.10.3",
     "cors": "^2.8.5",
     "date-fns": "^2.30.0",
@@ -46,6 +47,8 @@
     "firebase-admin": "^11.10.1",
     "jsonwebtoken": "^9.0.1",
     "mongoose": "^7.4.1",
-    "socket.io": "^4.7.2"
+    "short-uuid": "^4.2.2",
+    "socket.io": "^4.7.2",
+    "twilio": "^4.15.0"
   }
 }

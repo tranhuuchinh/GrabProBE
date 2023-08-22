@@ -16,6 +16,7 @@ import driverRoute from '~/routes/driverRoute'
 import SocketManager from './services/socket'
 import { setupMediator } from './services/DriverChannel/mediator'
 import DriverStatusService from './services/DriverChannel/DriverStatusService'
+import customerRoutes from './routes/customerRoutes'
 
 dotenv.config()
 
@@ -41,6 +42,7 @@ app.use(express.json({ limit: '10mb' }))
 /**
  * ROUTES
  */
+app.use('/customer', customerRoutes)
 app.use('/driver', driverRoute)
 app.use('/messages', messagesRoutes)
 app.use('/orders', orderRoutes)
@@ -50,13 +52,13 @@ app.use('/informs', informsRoute)
 app.use('/payments', paymentsRoute)
 app.use('/boxchat', boxchatRoutes)
 
-// const startApp = async () => {
-//   const queueNameDriver = 'driver_queue'
+const startApp = async () => {
+  const queueNameDriver = 'driver_queue'
 
-//   const { channel } = await setupMediator([queueNameDriver])
+  const { channel } = await setupMediator([queueNameDriver])
 
-//   DriverStatusService.startListening(channel, queueNameDriver)
-// }
+  DriverStatusService.startListening(channel, queueNameDriver)
+}
 
 // startApp()
 

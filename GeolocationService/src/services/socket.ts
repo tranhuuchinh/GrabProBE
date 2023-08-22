@@ -2,6 +2,7 @@ import { Server, Socket } from 'socket.io'
 import http from 'http'
 import { publishToMediator } from './CallCenterService/mediator'
 import ElasticsearchService from './ElasticsearchService'
+import UserFactory from './UserService/UserFactory'
 
 enum ClientStatus {
   IDLE = 'idle',
@@ -35,6 +36,7 @@ class SocketManager {
       socket.on('clientGeolocationResolved', async (message: any) => {
         console.log('Message from clientGeolocationResolved:', message)
         this.setClientStatus(socket.id, ClientStatus.IDLE)
+        if (!message) return
 
         const elasticsearchService = ElasticsearchService.getInstance()
         const indexStart = await elasticsearchService.createIndex(message?.data?.addressStart)
@@ -42,7 +44,11 @@ class SocketManager {
         if (indexStart != '') await elasticsearchService.addDocument(indexStart, message?.data?.geocodeStart)
         if (indexEnd != '') await elasticsearchService.addDocument(indexEnd, message?.data?.geocodeEnd)
 
-        publishToMediator({ type: 'GEOLOCATION_RESOLVED', data: message.data, geolocation: message.geolocation })
+        try {
+          publishToMediator({ type: 'GEOLOCATION_RESOLVED', data: message.data })
+        } catch (e) {
+          console.log(e)
+        }
       })
 
       socket.on('disconnect', () => {

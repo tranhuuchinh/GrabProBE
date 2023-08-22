@@ -10,14 +10,25 @@ class CustomerStatusService {
       (msg: any) => {
         if (msg && msg.content) {
           const message = JSON.parse(msg.content.toString())
-          if (message.type === 'CUSTOMER_RECEIVED') {
+          if (message.type === 'CUSTOMER_AROUND_DRIVER') {
             console.log(message)
             // 1. 4 vị trí tài xế gần nhất để hiển thị bên bản đồ từ Coordinate trả về
+            // Data trả về là idCustomer và mảng tọa độ các driver
+            socketManager.emitMessage(message.data.idCustomer, 'findDriver', message.data.drivers)
+            channel.ack(msg)
+          } else if (message.type === 'CUSTOMER_ACCEPT_REQUEST') {
+            console.log(message)
             // 2. Tài xế cuối cùng xác nhận => Hoàn thiện order
-            // 3. Tài xế hủy đơn hàng
+            // Data trả về là idOrder, idDriver, idCustomer
+            // Emit về data là idDriver
+            socketManager.emitMessage(message.data.idCustomer, 'acceptedDriver', message.data.idDriver)
 
-            // Gửi về client đó
-            // socketManager.emitMessage()
+            channel.ack(msg)
+          } else if (message.type === 'CUSTOMER_FOLLOW_DRIVER') {
+            console.log(message)
+            // Data trả về là idCustomer và {lat, lng} của Driver
+            // Từ idOrder tra ra idCustomer emit về data là idDriver
+            socketManager.emitMessage(message.data.idCustomer, 'followDriver', message.data.location)
 
             channel.ack(msg)
           }

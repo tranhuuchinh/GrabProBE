@@ -50,7 +50,7 @@ export default class ElasticsearchService {
       })
       return searchResponse.hits.hits
     } catch (e) {
-      console.log(e)
+      console.log('Search not found')
       return []
     }
   }

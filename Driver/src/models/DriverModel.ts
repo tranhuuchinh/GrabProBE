@@ -39,7 +39,9 @@ const DriverSchema = new mongoose.Schema(
         trim: true
       },
       type: {
-        type: Number
+        type: String,
+        enum: ['motobike', '4seats', '7seats'],
+        default: 'motobike'
       }
     },
     rating: {

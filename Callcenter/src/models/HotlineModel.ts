@@ -30,12 +30,14 @@ const HotlineSchema = new mongoose.Schema(
     },
     listOrder: [
       {
-        type: mongoose.Types.ObjectId
+        type: mongoose.Types.ObjectId,
+        ref: 'Order'
       }
     ],
     favoriteLocations: [
       {
-        type: mongoose.Types.ObjectId
+        type: mongoose.Types.ObjectId,
+        ref: 'Location'
       }
     ]
   },
