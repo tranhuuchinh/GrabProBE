@@ -96,7 +96,8 @@ class SocketManager {
                 from: savedFromLocation._id,
                 to: savedToLocation._id,
                 type: inforCustomer.type,
-                totalPrice: totalPrice
+                totalPrice: totalPrice,
+                distance: distance.toString() + 'Km'
               })
               const savedOrder = await newOrderNoDriver.save()
 
