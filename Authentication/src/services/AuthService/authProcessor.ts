@@ -8,8 +8,8 @@ class AuthProcessor {
     this.strategy = strategy
   }
 
-  async login(data: any): Promise<any> {
-    return this.strategy.login(data)
+  async login(data: any, role: any): Promise<any> {
+    return this.strategy.login(data, role)
   }
 }
 

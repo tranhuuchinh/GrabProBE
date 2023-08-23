@@ -1,5 +1,8 @@
 import * as amqp from 'amqplib/callback_api'
 import { publishToMediator } from './mediator'
+import LocationModel from '~/models/LocationModel'
+import HotlineModel from '~/models/HotlineModel'
+import OrderModel from '../../models/OrderModel'
 
 interface LocationDriver {
   from: { lat: number; lng: number }
@@ -54,10 +57,58 @@ class CoordinatorService {
     console.log('Coordinator Service is listening...')
     channel.consume(
       queueName,
-      (msg: any) => {
+      async (msg: any) => {
         if (msg && msg.content) {
           const message = JSON.parse(msg.content.toString())
           if (message.type === 'GEOLOCATION_RESOLVED') {
+            // Tạo Location model
+            let locationStart = await LocationModel.findOne({ address: message?.data?.addressStart })
+            if (locationStart === null) {
+              locationStart = await LocationModel.create({
+                address: message?.data?.addressStart,
+                latitude: message?.data?.geocodeStart?.lat,
+                altitude: message?.data?.geocodeStart?.lng
+              })
+            }
+            let locationEnd = await LocationModel.findOne({ address: message?.data?.addressEnd })
+            if (locationEnd === null) {
+              locationEnd = await LocationModel.create({
+                address: message?.data?.addressEnd,
+                latitude: message?.data?.geocodeEnd?.lat,
+                altitude: message?.data?.geocodeEnd?.lng
+              })
+            }
+            // Tạo Order
+            const order = await OrderModel.create({
+              idCustomer: message?.data?.user,
+              from: locationStart?._id,
+              to: locationEnd?._id,
+              type: message?.data?.type
+            })
+            // Update Location và Order vào Hotline model
+            const user = await HotlineModel.findOne({ idAccount: message?.data?.user })
+            const locations = user?.favoriteLocations || []
+            locations.push(locationStart?._id)
+            locations.push(locationEnd?._id)
+            const orders = user?.listOrder || []
+            orders.push(order?._id)
+            await HotlineModel.findOneAndUpdate(
+              { idAccount: message?.data?.user },
+              {
+                favoriteLocations: locations,
+                listOrder: orders
+              }
+            )
+            console.log('coor', order)
+
+            // Tiến hành điều phối xe
+            // const order = await Order({
+            //   idCustomer:
+            // })
+
+            // publishToMediator({ type: 'COORDINATOR_RESOLVED', data: message.data })
+            publishToMediator({ type: 'RIDE_STATUS_UPDATED', data: message?.data })
+
             // Tiến hành điều phối xe
             channel.ack(msg)
           } else if (message.type === 'COORDINATION_FIND_DRIVER') {

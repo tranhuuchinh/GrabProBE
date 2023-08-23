@@ -45,17 +45,7 @@ class SocketManager {
         if (indexEnd != '') await elasticsearchService.addDocument(indexEnd, message?.data?.geocodeEnd)
 
         try {
-          const user = await UserFactory.createUser(
-            'hotline',
-            '',
-            message?.data?.phone,
-            (Math.random() * 1000).toString(),
-            message?.data?.name || ''
-          )
-
-          message.data.user = user
-
-          publishToMediator({ type: 'GEOLOCATION_RESOLVED', data: message.data, geolocation: message.geolocation })
+          publishToMediator({ type: 'GEOLOCATION_RESOLVED', data: message.data })
         } catch (e) {
           console.log(e)
         }

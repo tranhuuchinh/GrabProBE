@@ -25,6 +25,7 @@ export default class UserFactory {
         email,
         role: typeUser
       })
+      console.log(fullname)
       switch (typeUser) {
         case 'customer':
           return new CustomerService(account?.id, fullname).createUser()
