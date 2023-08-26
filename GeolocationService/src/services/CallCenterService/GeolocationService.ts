@@ -19,7 +19,8 @@ class GeolocationService {
             // Gửi socket về cho client S2 định vị location
             const successSend = socketManager.sendBroadcastGeolocaion(message)
             console.log(successSend)
-            if (successSend) channel.ack(msg)
+            // if (successSend)
+            channel.ack(msg)
           }
         }
       },

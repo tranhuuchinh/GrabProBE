@@ -14,6 +14,7 @@ class RideStatusService {
             console.log('ride', message)
             // Gửi socket về cho bộ phận S3 theo dõi đơn hàng
             socketManager.sendBroadcastToClient('FOLLOW_ORDER_CLIENT', message.data)
+            publishToMediator({ type: 'SEND_SMS', data: message.data })
 
             channel.ack(msg)
           }
