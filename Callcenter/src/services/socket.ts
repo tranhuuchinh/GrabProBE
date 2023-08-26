@@ -5,7 +5,7 @@ import ElasticsearchService from './ElasticsearchService'
 import UserFactory, { IUser } from './UserService/UserFactory'
 import AccountModel from '~/models/AccountModel'
 import HotlineModel from '~/models/HotlineModel'
-import { RedisService } from './radis'
+import { RedisService } from './redis'
 
 enum ClientStatus {
   IDLE = 'idle',

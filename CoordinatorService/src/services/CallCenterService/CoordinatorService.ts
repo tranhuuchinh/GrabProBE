@@ -3,7 +3,7 @@ import { publishToMediator } from './mediator'
 import LocationModel from '~/models/LocationModel'
 import HotlineModel from '~/models/HotlineModel'
 import OrderModel from '../../models/OrderModel'
-import { RedisService } from '../radis'
+import { RedisService } from '../redis'
 
 interface LocationDriver {
   from: { lat: number; lng: number }
@@ -28,7 +28,7 @@ const calculateRealDistance = (latFrom: number, lngFrom: number, latTo: number, 
 
     request.open(
       'GET',
-      `https://api.openrouteservice.org/v2/directions/driving-car?api_key=5b3ce3597851110001cf6248f1a1f6627cbd4347adf8adc8296df114&start=${lngFrom},${latFrom}&end=${lngTo},${latTo}`
+      `https://api.openrouteservice.org/v2/directions/driving-car?api_key=${process.env.NOMINATIM_KEY}&start=${lngFrom},${latFrom}&end=${lngTo},${latTo}`
     )
 
     request.setRequestHeader(

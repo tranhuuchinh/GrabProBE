@@ -6,6 +6,9 @@ const hpp = require('hpp');
 const cors = require('cors');
 const { setupMediator } = require('./service/mediator');
 const SendSMSService = require('./service/SendSMSService');
+const dotenv = require('dotenv');
+
+dotenv.config();
 
 const limiter = rateLimit({
     // limiter is now become a middleware function

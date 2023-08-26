@@ -10,7 +10,7 @@ const queueMapping: Record<string, any> = {}
 
 export const setupMediator = async (queues: string[]) => {
   connection = await new Promise<amqp.Connection>((resolve, reject) => {
-    amqp.connect('amqp://grab:grab@localhost', (err, conn) => {
+    amqp.connect(process.env.RABBITMQ_URL || 'amqp://grab:grab@localhost', (err, conn) => {
       if (err) {
         reject(err)
       } else {

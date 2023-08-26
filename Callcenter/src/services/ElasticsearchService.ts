@@ -5,7 +5,16 @@ export default class ElasticsearchService {
   private client: Client
 
   private constructor() {
-    this.client = new Client({ node: 'http://localhost:9200' })
+    // this.client = new Client({ node: 'http://localhost:9200' })
+    this.client = new Client({
+      cloud: {
+        id: process.env.ELASTICSEARCH_CLOUD_ID || ''
+      },
+      auth: {
+        username: process.env.ELASTICSEARCH_USERNAME || '',
+        password: process.env.ELASTICSEARCH_PASSWORD || ''
+      }
+    })
   }
 
   public static getInstance(): ElasticsearchService {
@@ -50,7 +59,7 @@ export default class ElasticsearchService {
       })
       return searchResponse.hits.hits
     } catch (e) {
-      console.log('Search not found')
+      console.log('Search not found', e)
       return []
     }
   }
