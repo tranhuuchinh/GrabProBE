@@ -5,6 +5,7 @@ const router = express.Router()
 
 // Get all orders
 router.route('/').get(ordersController.getOrders)
+router.route('/:orderId').get(ordersController.getOrderByID)
 
 // Update feedback
 router.route('/:id').patch(ordersController.updateFeedBack)

@@ -22,9 +22,30 @@ interface Driver {
   }
 }
 
-// Wait for Chinh
-const calculateRealDistance = (latFrom: number, lngFrom: number, latTo: number, lngTo: number) => {
-  return 20
+const calculateRealDistance = (latFrom: number, lngFrom: number, latTo: number, lngTo: number): Promise<number> => {
+  return new Promise((resolve, reject) => {
+    const request = new XMLHttpRequest()
+
+    request.open(
+      'GET',
+      `https://api.openrouteservice.org/v2/directions/driving-car?api_key=5b3ce3597851110001cf6248f1a1f6627cbd4347adf8adc8296df114&start=${lngFrom},${latFrom}&end=${lngTo},${latTo}`
+    )
+
+    request.setRequestHeader(
+      'Accept',
+      'application/json, application/geo+json, application/gpx+xml, img/png; charset=utf-8'
+    )
+
+    request.onreadystatechange = function () {
+      if (this.readyState === 4) {
+        const responseObj = JSON.parse(this.responseText)
+        const distance = responseObj.features[0].properties.segments[0].distance
+        resolve(distance)
+      }
+    }
+
+    request.send()
+  })
 }
 
 class CoordinatorService {
@@ -115,14 +136,14 @@ class CoordinatorService {
             this.orderDriverInfoStore[idOrder].push(...driversData)
 
             // Sắp xếp lại danh sách theo khoảng cách tăng dần
-            this.orderDriverInfoStore[idOrder].sort((driverA: LocationDriver, driverB: LocationDriver) => {
-              const distanceA = calculateRealDistance(
+            this.orderDriverInfoStore[idOrder].sort(async (driverA: LocationDriver, driverB: LocationDriver) => {
+              const distanceA = await calculateRealDistance(
                 driverA.from.lat,
                 driverA.from.lng,
                 driverA.to.lat,
                 driverA.to.lng
               )
-              const distanceB = calculateRealDistance(
+              const distanceB = await calculateRealDistance(
                 driverB.from.lat,
                 driverB.from.lng,
                 driverB.to.lat,

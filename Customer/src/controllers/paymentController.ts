@@ -2,6 +2,28 @@ import express from 'express'
 import { catchAsync } from '~/utils/catchAsync'
 import PaymentModel from '~/models/PaymentModel'
 import { PaymentModelBuilder } from '~/services/PaymentService/PaymentBuilder'
+import { Auth } from '@vonage/auth'
+import { Messages, SMS } from '@vonage/messages'
+import { readFileSync } from 'fs'
+
+const privateKeyPath = `${__dirname}/private.test.key`
+const privateKeyString = readFileSync(privateKeyPath).toString()
+
+console.log(privateKeyString)
+
+const messagesClient = new Messages(
+  new Auth({
+    apiKey: '8e6aed8e',
+    apiSecret: 'Z1FZxqeN98SQtMUj',
+    applicationId: '1234',
+    privateKey: privateKeyString
+  })
+)
+
+messagesClient
+  .send(new SMS('Nội dung tin nhắn', '84898919260', 'Vonage APIs', 'clientRef'))
+  .then((resp) => console.log(resp))
+  .catch((err) => console.error(err))
 
 export default {
   getPayments: catchAsync(async (req: express.Request, res: express.Response, next: express.NextFunction) => {
