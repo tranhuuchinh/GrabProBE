@@ -3,6 +3,7 @@ import { publishToMediator } from './mediator'
 import LocationModel from '~/models/LocationModel'
 import HotlineModel from '~/models/HotlineModel'
 import OrderModel from '../../models/OrderModel'
+import { RedisService } from '../redis'
 
 interface LocationDriver {
   from: { lat: number; lng: number }
@@ -27,7 +28,7 @@ const calculateRealDistance = (latFrom: number, lngFrom: number, latTo: number, 
 
     request.open(
       'GET',
-      `https://api.openrouteservice.org/v2/directions/driving-car?api_key=5b3ce3597851110001cf6248f1a1f6627cbd4347adf8adc8296df114&start=${lngFrom},${latFrom}&end=${lngTo},${latTo}`
+      `https://api.openrouteservice.org/v2/directions/driving-car?api_key=${process.env.NOMINATIM_KEY}&start=${lngFrom},${latFrom}&end=${lngTo},${latTo}`
     )
 
     request.setRequestHeader(
@@ -54,6 +55,8 @@ class CoordinatorService {
     this.orderDriverInfoStore = {}
   }
   public static startListening = async (channel: amqp.Channel, queueName: string) => {
+    const redisService = RedisService.getInstance()
+
     console.log('Coordinator Service is listening...')
     channel.consume(
       queueName,
@@ -79,14 +82,19 @@ class CoordinatorService {
               })
             }
             // Tạo Order
-            const order = await OrderModel.create({
-              idCustomer: message?.data?.user,
-              from: locationStart?._id,
-              to: locationEnd?._id,
-              type: message?.data?.type
-            })
+            const order = await (
+              await (
+                await OrderModel.create({
+                  idCustomer: message?.data?.user,
+                  from: locationStart?._id,
+                  to: locationEnd?._id,
+                  type: message?.data?.type
+                })
+              ).populate('from')
+            ).populate('to')
+
             // Update Location và Order vào Hotline model
-            const user = await HotlineModel.findOne({ idAccount: message?.data?.user })
+            const user = await HotlineModel.findOne({ idAccount: message?.data?.user }).populate('idAccount')
             const locations = user?.favoriteLocations || []
             locations.push(locationStart?._id)
             locations.push(locationEnd?._id)
@@ -99,15 +107,16 @@ class CoordinatorService {
                 listOrder: orders
               }
             )
-            console.log('coor', order)
 
+            const newOrder = { user, order }
+            console.log('coor', newOrder)
             // Tiến hành điều phối xe
             // const order = await Order({
             //   idCustomer:
             // })
 
             // publishToMediator({ type: 'COORDINATOR_RESOLVED', data: message.data })
-            publishToMediator({ type: 'RIDE_STATUS_UPDATED', data: message?.data })
+            publishToMediator({ type: 'RIDE_STATUS_UPDATED', data: newOrder })
 
             // Tiến hành điều phối xe
             channel.ack(msg)
@@ -172,6 +181,13 @@ class CoordinatorService {
             }
 
             this.orderDriverInfoStore[message.data.idOrder].shift()
+
+            // Lưu vào radis để theo dõi lịch trình
+            // try {
+            //   await redisService.set(IDOrder, order)
+            // } catch (error) {
+            //   console.error('Error:', error)
+            // }
             channel.ack(msg)
           } else if (message.type === 'COORDINATION_DENY_REQUEST') {
             // 5. Tài xế bỏ cuốc, kiếm thằng khác
@@ -191,6 +207,7 @@ class CoordinatorService {
               }
               publishToMediator({ type: 'DRIVER_EMIT_DRIVER', data: driverIdOrderInfo })
             }
+            // Nếu trong danh sách hết nhưng vẫn chưa tìm được tài tài xế
             channel.ack(msg)
           }
         }

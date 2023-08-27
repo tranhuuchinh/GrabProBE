@@ -5,6 +5,7 @@ import ElasticsearchService from './ElasticsearchService'
 import UserFactory, { IUser } from './UserService/UserFactory'
 import AccountModel from '~/models/AccountModel'
 import HotlineModel from '~/models/HotlineModel'
+import { RedisService } from './redis'
 
 enum ClientStatus {
   IDLE = 'idle',
@@ -54,6 +55,17 @@ class SocketManager {
             }
           })
         this.emitMessage(socket.id, 'getUser', user)
+      })
+
+      // Get vị trí hiện tại của tài xế trong order
+      socket.on('getGeocodeDriver', async (idOrder: any) => {
+        const redisService = RedisService.getInstance()
+        try {
+          const order = await redisService.get(idOrder)
+          this.emitMessage(socket.id, 'getUser', order)
+        } catch (error) {
+          console.error('Error radis:', error)
+        }
       })
 
       socket.on('customerBooking', async (message: any) => {
