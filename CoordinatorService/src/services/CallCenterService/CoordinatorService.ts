@@ -112,6 +112,8 @@ class CoordinatorService {
             // Tiến hành điều phối xe
             channel.ack(msg)
           } else if (message.type === 'COORDINATION_FIND_DRIVER') {
+            console.log(message.data)
+
             // 1. Nhận thông tin khách hàng từ Customer Server và push qua Driver Server để tìm tài xế
             publishToMediator({ type: 'DRIVER_FIND_DRIVER', data: message.data })
             channel.ack(msg)

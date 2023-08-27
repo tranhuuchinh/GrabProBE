@@ -50,15 +50,15 @@ app.use('/informs', informsRoute)
 app.use('/payments', paymentsRoute)
 app.use('/boxchat', boxchatRoutes)
 
-// const startApp = async () => {
-//   const queueNameCustomer = 'customer_queue'
+const startApp = async () => {
+  const queueNameCustomer = 'customer_queue'
 
-//   const { channel } = await setupMediator([queueNameCustomer])
+  const { channel } = await setupMediator([queueNameCustomer])
 
-//   CustomerStatusService.startListening(channel, queueNameCustomer)
-// }
+  CustomerStatusService.startListening(channel, queueNameCustomer)
+}
 
-// startApp()
+startApp()
 
 /**
  * Server Activation
