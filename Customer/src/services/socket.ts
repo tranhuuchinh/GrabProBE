@@ -110,6 +110,8 @@ class SocketManager {
                 type: inforCustomer.type
               }
 
+              console.log(inforData)
+
               publishToMediator({ type: 'COORDINATION_FIND_DRIVER', data: inforData })
             }
           } catch (error) {

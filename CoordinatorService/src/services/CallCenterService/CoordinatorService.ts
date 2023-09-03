@@ -3,7 +3,7 @@ import { publishToMediator } from './mediator'
 import LocationModel from '~/models/LocationModel'
 import HotlineModel from '~/models/HotlineModel'
 import OrderModel from '../../models/OrderModel'
-import { RedisService } from '../redis'
+// import { RedisService } from '../redis'
 
 interface LocationDriver {
   from: { lat: number; lng: number }
@@ -55,7 +55,7 @@ class CoordinatorService {
     this.orderDriverInfoStore = {}
   }
   public static startListening = async (channel: amqp.Channel, queueName: string) => {
-    const redisService = RedisService.getInstance()
+    // const redisService = RedisService.getInstance()
 
     console.log('Coordinator Service is listening...')
     channel.consume(

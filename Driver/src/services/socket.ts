@@ -39,6 +39,8 @@ class SocketManager {
       this.connectedClients.set(socket.id, clientInfo)
 
       socket.on('setID', (inforDriver: any) => {
+        console.log(inforDriver)
+
         this.connectedClients.set(socket.id, {
           socket,
           status: ClientStatus.IDLE,
@@ -146,7 +148,11 @@ class SocketManager {
 
   sendBroadcastWithType(type: string, channel: string, message: any) {
     this.connectedClients.forEach((clientInfo) => {
+      console.log(clientInfo.type)
+
       if (clientInfo.type === type) {
+        console.log('1')
+
         clientInfo.socket.emit(channel, message)
       }
     })
