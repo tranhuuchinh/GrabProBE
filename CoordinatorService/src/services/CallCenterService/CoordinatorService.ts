@@ -39,7 +39,7 @@ const calculateRealDistance = (latFrom: number, lngFrom: number, latTo: number, 
     request.onreadystatechange = function () {
       if (this.readyState === 4) {
         const responseObj = JSON.parse(this.responseText)
-        const distance = responseObj.features[0].properties.segments[0].distance
+        const distance = responseObj?.features[0]?.properties?.segments[0]?.distance
         resolve(distance)
       }
     }
@@ -62,7 +62,7 @@ class CoordinatorService {
       queueName,
       async (msg: any) => {
         if (msg && msg.content) {
-          const message = JSON.parse(msg.content.toString())
+          const message = JSON.parse(msg.content?.toString())
           if (message.type === 'GEOLOCATION_RESOLVED') {
             // Tạo Location model
             let locationStart = await LocationModel.findOne({ address: message?.data?.addressStart })
@@ -124,11 +124,11 @@ class CoordinatorService {
             console.log(message.data)
 
             // 1. Nhận thông tin khách hàng từ Customer Server và push qua Driver Server để tìm tài xế
-            publishToMediator({ type: 'DRIVER_FIND_DRIVER', data: message.data })
+            publishToMediator({ type: 'DRIVER_FIND_DRIVER', data: message?.data })
             channel.ack(msg)
           } else if (message.type === 'COORDINATION_BOOK_REQUEST') {
-            const idOrder = message.data.idOrder
-            const driversData = message.data.drivers
+            const idOrder = message?.data?.idOrder
+            const driversData = message?.data?.drivers
 
             if (!this.orderDriverInfoStore[idOrder]) {
               this.orderDriverInfoStore[idOrder] = []
@@ -140,16 +140,16 @@ class CoordinatorService {
             // Sắp xếp lại danh sách theo khoảng cách tăng dần
             this.orderDriverInfoStore[idOrder].sort(async (driverA: LocationDriver, driverB: LocationDriver) => {
               const distanceA = await calculateRealDistance(
-                driverA.from.lat,
-                driverA.from.lng,
-                driverA.to.lat,
-                driverA.to.lng
+                driverA?.from?.lat,
+                driverA?.from?.lng,
+                driverA?.to?.lat,
+                driverA?.to?.lng
               )
               const distanceB = await calculateRealDistance(
-                driverB.from.lat,
-                driverB.from.lng,
-                driverB.to.lat,
-                driverB.to.lng
+                driverB?.from?.lat,
+                driverB?.from?.lng,
+                driverB?.to?.lat,
+                driverB?.to?.lng
               )
               return distanceA - distanceB
             })
@@ -173,14 +173,14 @@ class CoordinatorService {
             // ra khỏi hàng chờ các đơn hàng khác
             // data là idOrder, idDriver, idCustomer
             for (const orderId in this.orderDriverInfoStore) {
-              if (orderId !== message.data.idOrder) {
+              if (orderId !== message?.data?.idOrder) {
                 this.orderDriverInfoStore[orderId] = this.orderDriverInfoStore[orderId].filter(
-                  (driver: Driver) => driver.idDriver !== message.data.idDriver
+                  (driver: Driver) => driver?.idDriver !== message?.data?.idDriver
                 )
               }
             }
 
-            this.orderDriverInfoStore[message.data.idOrder].shift()
+            this.orderDriverInfoStore[message?.data?.idOrder].shift()
 
             // Lưu vào radis để theo dõi lịch trình
             // try {
@@ -192,18 +192,18 @@ class CoordinatorService {
           } else if (message.type === 'COORDINATION_DENY_REQUEST') {
             // 5. Tài xế bỏ cuốc, kiếm thằng khác
             // data là idOrder, idDriver
-            if (this.orderDriverInfoStore[message.data.idOrder]) {
-              this.orderDriverInfoStore[message.data.idOrder] = this.orderDriverInfoStore[message.data.idOrder].filter(
-                (driver: Driver) => driver.idDriver !== message.data.idDriver
-              )
+            if (this.orderDriverInfoStore[message?.data?.idOrder]) {
+              this.orderDriverInfoStore[message?.data?.idOrder] = this.orderDriverInfoStore[
+                message?.data?.idOrder
+              ].filter((driver: Driver) => driver?.idDriver !== message?.data?.idDriver)
             }
 
             //Kiếm lại thằng tiếp theo trong danh sách
-            if (this.orderDriverInfoStore[message.data.idOrder].length > 0) {
-              const shortestDistanceDriver = this.orderDriverInfoStore[message.data.idOrder][0]
+            if (this.orderDriverInfoStore[message?.data?.idOrder]?.length > 0) {
+              const shortestDistanceDriver = this.orderDriverInfoStore[message?.data?.idOrder][0]
               const driverIdOrderInfo = {
-                idOrder: message.data.idOrder,
-                idDriver: shortestDistanceDriver.idDriver
+                idOrder: message?.data?.idOrder,
+                idDriver: shortestDistanceDriver?.idDriver
               }
               publishToMediator({ type: 'DRIVER_EMIT_DRIVER', data: driverIdOrderInfo })
             }

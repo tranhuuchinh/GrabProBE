@@ -1,0 +1,81 @@
+version: '3'
+services:
+  nginx:
+    image: nginx:latest
+    container_name: api-gateway
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "80:80"
+      
+  authentication:
+    build:
+      context: ../Authentication
+      dockerfile: Dockerfile
+    image: authentication
+    container_name: authentication
+    ports:
+      - "3000:3000"
+      
+  customer:
+    build:
+      context: ../Customer
+      dockerfile: Dockerfile
+    image: customer
+    container_name: customer
+    ports:
+      - "3001:3001"
+      
+  driver:
+    build:
+      context: ../Driver
+      dockerfile: Dockerfile
+    image: driver
+    container_name: driver
+    ports:
+      - "3002:3002"
+
+  callcenter:
+    build:
+      context: ../Callcenter
+      dockerfile: Dockerfile
+    image: callcenter
+    container_name: callcenter
+    ports:
+      - "3003:3003"
+      
+  admin:
+    build:
+      context: ../Admin
+      dockerfile: Dockerfile
+    image: admin
+    container_name: admin
+    ports:
+      - "3004:3004"
+
+  geolocation:
+    build:
+      context: ../Geolocation
+      dockerfile: Dockerfile
+    image: geolocation
+    container_name: geolocation
+    ports:
+      - "3005:3005"
+    
+  coordinator:
+    build:
+      context: ../Coordinator
+      dockerfile: Dockerfile
+    image: coordinator
+    container_name: coordinator
+    ports:
+      - "3006:3006"
+      
+  smsservice:
+    build:
+      context: ../SmsService
+      dockerfile: Dockerfile
+    image: smsservice
+    container_name: smsservice
+    ports:
+      - "3007:3007"

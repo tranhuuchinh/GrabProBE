@@ -17,12 +17,12 @@ const axios = require('axios');
 
 const APIKey = '094B28ADAEF4D1BF03B00FB008A98A';
 const SecretKey = 'E8AD239C02FF7E7AB0F22EB6FCC524';
-const YourPhone = '0824704789';
+const YourPhone = '0824.704.789';
 // const YourPhone = '0901.888.484';
 const Content = 'Welcome to esms.vn';
 
 const SendContent = encodeURIComponent(Content);
-const data = `http://rest.esms.vn/MainService.svc/json/SendMultipleMessage_V4_get?Phone=${YourPhone}&Content=${SendContent}&ApiKey=${APIKey}&SecretKey=${SecretKey}&IsUnicode=0&SmsType=8&RequestId=123456`;
+const data = `http://rest.esms.vn/MainService.svc/json/SendMultipleMessage_V4_get?Phone=${YourPhone}&Content=${SendContent}&ApiKey=${APIKey}&SecretKey=${SecretKey}&IsUnicode=0&SmsType=8&RequestId=${YourPhone}`;
 
 class SendSMSService {
     static startListening = async (channel, queueName) => {
@@ -117,6 +117,7 @@ class SendSMSService {
             const response = await axios.get(data);
 
             const obj = response.data;
+            console.log(obj);
             if (obj.CodeResult === 100) {
                 console.log('CodeResult:', obj.CodeResult);
                 console.log('CountRegenerate:', obj.CountRegenerate);
