@@ -87,7 +87,7 @@ export default {
 
     try {
       if (orderId) {
-        const order = await OrderModel.findById(orderId).populate('from').populate('to').exec()
+        const order = await OrderModel.findOne({ _id: orderId }).populate('from').populate('to').exec()
 
         if (order) {
           res.status(200).json({

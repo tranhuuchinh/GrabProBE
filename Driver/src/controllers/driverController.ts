@@ -42,5 +42,8 @@ export default {
         message: error.message
       })
     }
+  }),
+  updateCustomer: catchAsync(async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    const id = req.params.id
   })
 }
