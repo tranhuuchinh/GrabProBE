@@ -41,7 +41,6 @@ export default {
   getOrders: catchAsync(async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     const id = req.query.idUser
     const type = req.query.type
-    console.log('Vinh')
 
     try {
       if (req.query.idUser) {
@@ -51,7 +50,15 @@ export default {
           .exec()
 
         if (type) {
-          const filteredOrders = orders.filter((item) => (item as unknown as Order).type === type)
+          let filteredOrders = []
+          if (type === 'GrabCar') {
+            filteredOrders = orders.filter((item) => {
+              const orderType = (item as unknown as Order).type
+              return orderType === '4seats' || orderType === '7seats'
+            })
+          } else {
+            filteredOrders = orders.filter((item) => (item as unknown as Order).type === 'motobike')
+          }
           res.status(200).json({
             status: 'success',
             total: filteredOrders.length,
@@ -71,39 +78,6 @@ export default {
           status: 'success',
           total: orders.length,
           data: orders
-        })
-      }
-    } catch (error: any) {
-      res.status(500).json({
-        status: 'error',
-        message: error.message
-      })
-    }
-  }),
-
-  getOrderByID: catchAsync(async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    const orderId = req.params.orderId // Sử dụng req.params.orderId để lấy giá trị orderId từ đường dẫn URL
-    console.log('Vinh')
-
-    try {
-      if (orderId) {
-        const order = await OrderModel.findById(orderId).populate('from').populate('to').exec()
-
-        if (order) {
-          res.status(200).json({
-            status: 'success',
-            data: order
-          })
-        } else {
-          res.status(404).json({
-            status: 'error',
-            message: 'Order not found'
-          })
-        }
-      } else {
-        res.status(400).json({
-          status: 'error',
-          message: 'Missing orderId parameter'
         })
       }
     } catch (error: any) {
@@ -142,10 +116,9 @@ export default {
 
   updateStatus: catchAsync(async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     const id = req.params.id
-    const body = req.body
 
     try {
-      const order = await OrderModel.findOneAndUpdate({ _id: id }, body, { new: true }).exec()
+      const order = await OrderModel.findOneAndUpdate({ _id: id }, { status: 0 }, { new: true }).exec()
 
       if (!order) {
         return res.status(404).json({

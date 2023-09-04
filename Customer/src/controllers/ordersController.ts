@@ -50,7 +50,15 @@ export default {
           .exec()
 
         if (type) {
-          const filteredOrders = orders.filter((item) => (item as unknown as Order).type === type)
+          let filteredOrders = []
+          if (type === 'GrabCar') {
+            filteredOrders = orders.filter((item) => {
+              const orderType = (item as unknown as Order).type
+              return orderType === '4seats' || orderType === '7seats'
+            })
+          } else {
+            filteredOrders = orders.filter((item) => (item as unknown as Order).type === 'motobike')
+          }
           res.status(200).json({
             status: 'success',
             total: filteredOrders.length,
@@ -108,10 +116,9 @@ export default {
 
   updateStatus: catchAsync(async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     const id = req.params.id
-    const body = req.body
 
     try {
-      const order = await OrderModel.findOneAndUpdate({ _id: id }, body, { new: true }).exec()
+      const order = await OrderModel.findOneAndUpdate({ _id: id }, { status: 0 }, { new: true }).exec()
 
       if (!order) {
         return res.status(404).json({

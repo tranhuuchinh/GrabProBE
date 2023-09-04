@@ -40,8 +40,8 @@ const OrderSchema = new mongoose.Schema(
     },
     type: {
       type: String,
-      enum: ['GrabCar', 'GrabBike'],
-      default: 'GrabCar'
+      enum: ['motobike', '4seats', '7seats'],
+      default: 'motobike'
     },
     distance: {
       type: String,
