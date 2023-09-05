@@ -7,8 +7,8 @@ import { Twilio } from 'twilio'
 export default {
   getPayments: catchAsync(async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     try {
-      const accountSid = 'AC530d5e90d802ddfd1b9e32e6fe476fee'
-      const authToken = '8a0aba1fdf5b462aac8f73dfe829e3e7'
+      const accountSid = 'hehe'
+      const authToken = '123'
       const client = new Twilio(accountSid, authToken)
 
       client.messages
