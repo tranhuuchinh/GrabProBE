@@ -3,6 +3,7 @@ import { publishToMediator } from './mediator'
 import LocationModel from '~/models/LocationModel'
 import HotlineModel from '~/models/HotlineModel'
 import OrderModel from '../../models/OrderModel'
+// import XMLHttpRequest from 'xhr2'
 // import { RedisService } from '../redis'
 
 interface LocationDriver {
@@ -22,40 +23,43 @@ interface Driver {
   }
 }
 
+interface OrderDriverInfoStore {
+  [idOrder: string]: Driver[]
+}
+
 const calculateRealDistance = (latFrom: number, lngFrom: number, latTo: number, lngTo: number): Promise<number> => {
   return new Promise((resolve, reject) => {
-    const request = new XMLHttpRequest()
+    // const request = new XMLHttpRequest()
 
-    request.open(
-      'GET',
-      `https://api.openrouteservice.org/v2/directions/driving-car?api_key=${process.env.NOMINATIM_KEY}&start=${lngFrom},${latFrom}&end=${lngTo},${latTo}`
-    )
+    // request.open(
+    //   'GET',
+    //   `https://api.openrouteservice.org/v2/directions/driving-car?api_key=${process.env.NOMINATIM_KEY}&start=${lngFrom},${latFrom}&end=${lngTo},${latTo}`
+    // )
 
-    request.setRequestHeader(
-      'Accept',
-      'application/json, application/geo+json, application/gpx+xml, img/png; charset=utf-8'
-    )
+    // request.setRequestHeader(
+    //   'Accept',
+    //   'application/json, application/geo+json, application/gpx+xml, img/png; charset=utf-8'
+    // )
 
-    request.onreadystatechange = function () {
-      if (this.readyState === 4) {
-        const responseObj = JSON.parse(this.responseText)
-        const distance = responseObj?.features[0]?.properties?.segments[0]?.distance
-        resolve(distance)
-      }
-    }
+    // request.onreadystatechange = function () {
+    //   if (this.readyState === 4) {
+    //     const responseObj = JSON.parse(this.responseText)
+    //     const distance = responseObj?.features[0]?.properties?.segments[0]?.distance
+    //     resolve(distance)
+    //   }
+    // }
 
-    request.send()
+    // request.send()
+    resolve(30)
   })
 }
 
 class CoordinatorService {
-  orderDriverInfoStore: object
-  static orderDriverInfoStore: any
-  constructor() {
-    this.orderDriverInfoStore = {}
-  }
+  static orderDriverInfoStore: OrderDriverInfoStore = {}
+  constructor() {}
   public static startListening = async (channel: amqp.Channel, queueName: string) => {
     // const redisService = RedisService.getInstance()
+    CoordinatorService.orderDriverInfoStore = {}
 
     console.log('Coordinator Service is listening...')
     channel.consume(
@@ -63,6 +67,7 @@ class CoordinatorService {
       async (msg: any) => {
         if (msg && msg.content) {
           const message = JSON.parse(msg.content?.toString())
+
           if (message.type === 'GEOLOCATION_RESOLVED') {
             // Tạo Location model
             let locationStart = await LocationModel.findOne({ address: message?.data?.addressStart })
@@ -127,46 +132,58 @@ class CoordinatorService {
             publishToMediator({ type: 'DRIVER_FIND_DRIVER', data: message?.data })
             channel.ack(msg)
           } else if (message.type === 'COORDINATION_BOOK_REQUEST') {
+            console.log('BOOK' + message.data)
             const idOrder = message?.data?.idOrder
             const driversData = message?.data?.drivers
 
-            if (!this.orderDriverInfoStore[idOrder]) {
-              this.orderDriverInfoStore[idOrder] = []
-            }
-
-            // Lưu thông tin tài xế và đơn hàng vào store tạm thời
-            this.orderDriverInfoStore[idOrder].push(...driversData)
-
-            // Sắp xếp lại danh sách theo khoảng cách tăng dần
-            this.orderDriverInfoStore[idOrder].sort(async (driverA: LocationDriver, driverB: LocationDriver) => {
-              const distanceA = await calculateRealDistance(
-                driverA?.from?.lat,
-                driverA?.from?.lng,
-                driverA?.to?.lat,
-                driverA?.to?.lng
-              )
-              const distanceB = await calculateRealDistance(
-                driverB?.from?.lat,
-                driverB?.from?.lng,
-                driverB?.to?.lat,
-                driverB?.to?.lng
-              )
-              return distanceA - distanceB
-            })
-
-            // Lấy 3 phần tử đầu để gửi về cho khách hàng
-            const closestDrivers = this.orderDriverInfoStore[idOrder].slice(0, 3)
-            publishToMediator({ type: 'CUSTOMER_AROUND_DRIVER', data: closestDrivers })
-
-            // Lấy phần tử đầu tiên (ngắn nhất) để gửi về cho tài xế
-            if (this.orderDriverInfoStore[idOrder].length > 0) {
-              const shortestDistanceDriver = this.orderDriverInfoStore[idOrder][0]
-              const driverIdOrderInfo = {
-                idOrder: idOrder,
-                idDriver: shortestDistanceDriver.idDriver
+            if (idOrder && driversData) {
+              if (!this.orderDriverInfoStore[idOrder]) {
+                this.orderDriverInfoStore[idOrder] = []
               }
-              publishToMediator({ type: 'DRIVER_EMIT_DRIVER', data: driverIdOrderInfo })
+
+              // Lưu thông tin tài xế và đơn hàng vào store tạm thời
+              this.orderDriverInfoStore[idOrder].push(...driversData)
+
+              // Sắp xếp lại danh sách theo khoảng cách tăng dần
+              const distances: number[] = []
+
+              for (const driver of this.orderDriverInfoStore[idOrder]) {
+                const distance = await calculateRealDistance(
+                  driver.from.lat,
+                  driver.from.lng,
+                  driver.to.lat,
+                  driver.to.lng
+                )
+                distances.push(distance)
+              }
+
+              this.orderDriverInfoStore[idOrder].sort((driverA: Driver, driverB: Driver) => {
+                const indexA = this.orderDriverInfoStore[idOrder].indexOf(driverA)
+                const indexB = this.orderDriverInfoStore[idOrder].indexOf(driverB)
+                return distances[indexA] - distances[indexB]
+              })
+
+              // Lấy 3 phần tử đầu để gửi về cho khách hàng
+              const closestDrivers = this.orderDriverInfoStore[idOrder].slice(0, 3)
+              console.log('CUSTOMER_AROUND_DRIVER')
+              console.log(closestDrivers)
+
+              publishToMediator({ type: 'CUSTOMER_AROUND_DRIVER', data: closestDrivers })
+
+              // Lấy phần tử đầu tiên (ngắn nhất) để gửi về cho tài xế
+              if (this.orderDriverInfoStore[idOrder].length > 0) {
+                const shortestDistanceDriver = this.orderDriverInfoStore[idOrder][0]
+                const driverIdOrderInfo = {
+                  idOrder: idOrder,
+                  idDriver: shortestDistanceDriver.idDriver
+                }
+                console.log('DRIVER_EMIT_DRIVER')
+                console.log(driverIdOrderInfo)
+
+                publishToMediator({ type: 'DRIVER_EMIT_DRIVER', data: driverIdOrderInfo })
+              }
             }
+
             channel.ack(msg)
           } else if (message.type === 'COORDINATION_ACCEPT_REQUEST') {
             // 4. Tài xế đã nhận lên đây xóa order đó trong store đồng thời xóa luôn tài xế đó
@@ -192,21 +209,21 @@ class CoordinatorService {
           } else if (message.type === 'COORDINATION_DENY_REQUEST') {
             // 5. Tài xế bỏ cuốc, kiếm thằng khác
             // data là idOrder, idDriver
-            if (this.orderDriverInfoStore[message?.data?.idOrder]) {
-              this.orderDriverInfoStore[message?.data?.idOrder] = this.orderDriverInfoStore[
-                message?.data?.idOrder
-              ].filter((driver: Driver) => driver?.idDriver !== message?.data?.idDriver)
-            }
+            // if (this.orderDriverInfoStore[message?.data?.idOrder]) {
+            //   this.orderDriverInfoStore[message?.data?.idOrder] = this.orderDriverInfoStore[
+            //     message?.data?.idOrder
+            //   ].filter((driver: Driver) => driver?.idDriver !== message?.data?.idDriver)
+            // }
 
-            //Kiếm lại thằng tiếp theo trong danh sách
-            if (this.orderDriverInfoStore[message?.data?.idOrder]?.length > 0) {
-              const shortestDistanceDriver = this.orderDriverInfoStore[message?.data?.idOrder][0]
-              const driverIdOrderInfo = {
-                idOrder: message?.data?.idOrder,
-                idDriver: shortestDistanceDriver?.idDriver
-              }
-              publishToMediator({ type: 'DRIVER_EMIT_DRIVER', data: driverIdOrderInfo })
-            }
+            // //Kiếm lại thằng tiếp theo trong danh sách
+            // if (this.orderDriverInfoStore[message?.data?.idOrder]?.length > 0) {
+            //   const shortestDistanceDriver = this.orderDriverInfoStore[message?.data?.idOrder][0]
+            //   const driverIdOrderInfo = {
+            //     idOrder: message?.data?.idOrder,
+            //     idDriver: shortestDistanceDriver?.idDriver
+            //   }
+            //   publishToMediator({ type: 'DRIVER_EMIT_DRIVER', data: driverIdOrderInfo })
+            // }
             // Nếu trong danh sách hết nhưng vẫn chưa tìm được tài tài xế
             channel.ack(msg)
           }

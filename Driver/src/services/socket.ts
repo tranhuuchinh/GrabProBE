@@ -72,6 +72,8 @@ class SocketManager {
             drivers: this.driverInfoByOrder[idOrder]
           }
 
+          console.log('Gửi nè' + coordinationData)
+
           // Gửi thông tin điều phối lên mediator
           publishToMediator({ type: 'COORDINATION_BOOK_REQUEST', data: coordinationData })
 
@@ -148,11 +150,7 @@ class SocketManager {
 
   sendBroadcastWithType(type: string, channel: string, message: any) {
     this.connectedClients.forEach((clientInfo) => {
-      console.log(clientInfo.type)
-
       if (clientInfo.type === type) {
-        console.log('1')
-
         clientInfo.socket.emit(channel, message)
       }
     })

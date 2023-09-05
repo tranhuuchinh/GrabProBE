@@ -58,7 +58,7 @@ const startApp = async () => {
   CustomerStatusService.startListening(channel, queueNameCustomer)
 }
 
-// startApp()
+startApp()
 
 /**
  * Server Activation

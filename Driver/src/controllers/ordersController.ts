@@ -88,6 +88,38 @@ export default {
     }
   }),
 
+  getOrderByID: catchAsync(async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    const orderId = req.params.orderId // Sử dụng req.params.orderId để lấy giá trị orderId từ đường dẫn URL
+
+    try {
+      if (orderId) {
+        const order = await OrderModel.findOne({ _id: orderId }).populate('from').populate('to').exec()
+
+        if (order) {
+          res.status(200).json({
+            status: 'success',
+            data: order
+          })
+        } else {
+          res.status(404).json({
+            status: 'error',
+            message: 'Order not found'
+          })
+        }
+      } else {
+        res.status(400).json({
+          status: 'error',
+          message: 'Missing orderId parameter'
+        })
+      }
+    } catch (error: any) {
+      res.status(500).json({
+        status: 'error',
+        message: error.message
+      })
+    }
+  }),
+
   updateFeedBack: catchAsync(async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     const id = req.params.id
     const star = req.body.star
