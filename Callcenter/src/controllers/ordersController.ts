@@ -50,7 +50,15 @@ export default {
           .exec()
 
         if (type) {
-          const filteredOrders = orders.filter((item) => (item as unknown as Order).type === type)
+          let filteredOrders = []
+          if (type === 'GrabCar') {
+            filteredOrders = orders.filter((item) => {
+              const orderType = (item as unknown as Order).type
+              return orderType === '4seats' || orderType === '7seats'
+            })
+          } else {
+            filteredOrders = orders.filter((item) => (item as unknown as Order).type === 'motobike')
+          }
           res.status(200).json({
             status: 'success',
             total: filteredOrders.length,
