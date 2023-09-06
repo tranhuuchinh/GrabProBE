@@ -1,6 +1,8 @@
 const amqp = require('amqplib/callback_api');
+import { Twilio } from 'twilio';
 // const { Vonage } = require('@vonage/server-sdk');
 const http = require('http');
+import express from 'express';
 const https = require('https');
 const axios = require('axios');
 
@@ -43,6 +45,35 @@ class SendSMSService {
             },
             { noAck: false }
         );
+    };
+
+    static sendSMS = async () => {
+        try {
+            const accountSid = 'hehe';
+            const authToken = '123';
+            const client = new Twilio(accountSid, authToken);
+
+            client.messages
+                .create({
+                    from: '+12565884188',
+                    to: '+84377023495',
+                    body: 'Con Chó Chính  ',
+                })
+                .then((message) => console.log(message.sid))
+                .catch((error) => console.log(error));
+
+            const payments = await PaymentModel.find({}).exec();
+            res.status(200).json({
+                status: 'success',
+                total: payments.length,
+                data: payments,
+            });
+        } catch (error) {
+            res.status(500).json({
+                status: 'error',
+                message: error.message,
+            });
+        }
     };
 
     // Vonage
@@ -112,23 +143,23 @@ class SendSMSService {
     // };
 
     // eSMS
-    static sendSMS = async () => {
-        try {
-            const response = await axios.get(data);
+    // static sendSMS = async () => {
+    //     try {
+    //         const response = await axios.get(data);
 
-            const obj = response.data;
-            console.log(obj);
-            if (obj.CodeResult === 100) {
-                console.log('CodeResult:', obj.CodeResult);
-                console.log('CountRegenerate:', obj.CountRegenerate);
-                console.log('SMSID:', obj.SMSID);
-            } else {
-                console.log('ErrorMessage:', obj.ErrorMessage);
-            }
-        } catch (error) {
-            console.error('Error:', error.message);
-        }
-    };
+    //         const obj = response.data;
+    //         console.log(obj);
+    //         if (obj.CodeResult === 100) {
+    //             console.log('CodeResult:', obj.CodeResult);
+    //             console.log('CountRegenerate:', obj.CountRegenerate);
+    //             console.log('SMSID:', obj.SMSID);
+    //         } else {
+    //             console.log('ErrorMessage:', obj.ErrorMessage);
+    //         }
+    //     } catch (error) {
+    //         console.error('Error:', error.message);
+    //     }
+    // };
 }
 
 module.exports = SendSMSService;

@@ -30,6 +30,7 @@
     "nodemailer-smtp-transport": "^2.7.4",
     "nodemon": "^2.0.20",
     "socket.io": "^4.5.3",
+    "twilio": "^4.16.0",
     "validator": "^13.7.0",
     "xss-clean": "^0.1.1"
   },
