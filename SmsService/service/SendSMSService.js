@@ -1,21 +1,6 @@
 const amqp = require('amqplib/callback_api');
-import { Twilio } from 'twilio';
-// const { Vonage } = require('@vonage/server-sdk');
-const http = require('http');
-import express from 'express';
-const https = require('https');
-const axios = require('axios');
-
-// const vonage = new Vonage({
-//     apiKey: 'c7f6ea7c',
-//     apiSecret: 'MprGMZNrZsQJU29l',
-// });
-
-// const from = 'Vonage APIs';
-// const to = '840824704789';
-// const text = 'SMS API';
-
-// const ACCESS_TOKEN = 'F0tA3mbssfwwzzR3o8GiHukD3ZDyNWlO';
+// const { Twilio } = require('twilio');
+const Twilio = require('twilio');
 
 const APIKey = '094B28ADAEF4D1BF03B00FB008A98A';
 const SecretKey = 'E8AD239C02FF7E7AB0F22EB6FCC524';
@@ -48,32 +33,18 @@ class SendSMSService {
     };
 
     static sendSMS = async () => {
-        try {
-            const accountSid = 'hehe';
-            const authToken = '123';
-            const client = new Twilio(accountSid, authToken);
+        const accountSid = 'AC530d5e90d802ddfd1b9e32e6fe476fee';
+        const authToken = '8353a13c9fcc35eeb6a90530d09994dc';
+        const client = new Twilio(accountSid, authToken);
 
-            client.messages
-                .create({
-                    from: '+12565884188',
-                    to: '+84377023495',
-                    body: 'Con Chó Chính  ',
-                })
-                .then((message) => console.log(message.sid))
-                .catch((error) => console.log(error));
-
-            const payments = await PaymentModel.find({}).exec();
-            res.status(200).json({
-                status: 'success',
-                total: payments.length,
-                data: payments,
-            });
-        } catch (error) {
-            res.status(500).json({
-                status: 'error',
-                message: error.message,
-            });
-        }
+        client.messages
+            .create({
+                from: '+12565884188',
+                to: '+84377023495',
+                body: 'Con Chó Chính  ',
+            })
+            .then((message) => console.log(message.sid))
+            .catch((error) => console.log(error));
     };
 
     // Vonage

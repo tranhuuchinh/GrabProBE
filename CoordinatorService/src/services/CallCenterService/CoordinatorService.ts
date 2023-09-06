@@ -2,6 +2,7 @@ import * as amqp from 'amqplib/callback_api'
 import { publishToMediator } from './mediator'
 import LocationModel from '~/models/LocationModel'
 import HotlineModel from '~/models/HotlineModel'
+import TypeTransportModel from '~/models/TypeTransportModel'
 import OrderModel from '../../models/OrderModel'
 import { RedisService } from '../redis'
 
@@ -68,6 +69,9 @@ class CoordinatorService {
           const message = JSON.parse(msg.content?.toString())
 
           if (message.type === 'GEOLOCATION_RESOLVED') {
+            console.log('Geolocation')
+            console.log(message.data)
+
             // Tạo Location model
             let locationStart = await LocationModel.findOne({ address: message?.data?.addressStart })
             if (locationStart === null) {
@@ -86,41 +90,57 @@ class CoordinatorService {
               })
             }
             // Tạo Order
-            const order = await (
-              await (
-                await OrderModel.create({
-                  idCustomer: message?.data?.user,
-                  from: locationStart?._id,
-                  to: locationEnd?._id,
-                  type: message?.data?.type
-                })
-              ).populate('from')
-            ).populate('to')
+            try {
+              const typeTransport = await TypeTransportModel.findOne({ name: message?.data?.type })
+              if (typeTransport) {
+                const pricePerKm = typeTransport.priceperKm
 
-            // Update Location và Order vào Hotline model
-            const user = await HotlineModel.findOne({ idAccount: message?.data?.user }).populate('idAccount')
-            const locations = user?.favoriteLocations || []
-            locations.push(locationStart?._id)
-            locations.push(locationEnd?._id)
-            const orders = user?.listOrder || []
-            orders.push(order?._id)
-            await HotlineModel.findOneAndUpdate(
-              { idAccount: message?.data?.user },
-              {
-                favoriteLocations: locations,
-                listOrder: orders
+                const distance = parseFloat(message?.data?.distance)
+
+                // Tính toán totalPrice dựa trên pricePerKm và distance
+                const totalPrice = pricePerKm * distance
+
+                const order = await (
+                  await (
+                    await OrderModel.create({
+                      idCustomer: message?.data?.user,
+                      from: locationStart?._id,
+                      to: locationEnd?._id,
+                      type: message?.data?.type,
+                      totalPrice: totalPrice,
+                      distance: distance.toString() + 'Km'
+                    })
+                  ).populate('from')
+                ).populate('to')
+
+                // Update Location và Order vào Hotline model
+                const user = await HotlineModel.findOne({ idAccount: message?.data?.user }).populate('idAccount')
+                const locations = user?.favoriteLocations || []
+                locations.push(locationStart?._id)
+                locations.push(locationEnd?._id)
+                const orders = user?.listOrder || []
+                orders.push(order?._id)
+                await HotlineModel.findOneAndUpdate(
+                  { idAccount: message?.data?.user },
+                  {
+                    favoriteLocations: locations,
+                    listOrder: orders
+                  }
+                )
+
+                const newOrder = { user, order }
+                console.log('coor', newOrder)
+                // Tiến hành điều phối xe
+                // const order = await Order({
+                //   idCustomer:
+                // })
+
+                // publishToMediator({ type: 'COORDINATOR_RESOLVED', data: message.data })
+                publishToMediator({ type: 'RIDE_STATUS_UPDATED', data: newOrder })
               }
-            )
-
-            const newOrder = { user, order }
-            console.log('coor', newOrder)
-            // Tiến hành điều phối xe
-            // const order = await Order({
-            //   idCustomer:
-            // })
-
-            // publishToMediator({ type: 'COORDINATOR_RESOLVED', data: message.data })
-            publishToMediator({ type: 'RIDE_STATUS_UPDATED', data: newOrder })
+            } catch (error) {
+              console.error('Error creating order:', error)
+            }
 
             // Tiến hành điều phối xe
             channel.ack(msg)

@@ -17,6 +17,36 @@ interface ClientInfo {
   status: ClientStatus
 }
 
+const calculateRealDistance = (latFrom: number, lngFrom: number, latTo: number, lngTo: number): Promise<number> => {
+  return new Promise<number>((resolve, reject) => {
+    const request = new XMLHttpRequest()
+
+    request.open(
+      'GET',
+      `https://api.openrouteservice.org/v2/directions/driving-car?api_key=${process.env.NOMINATIM_KEY}&start=${lngFrom},${latFrom}&end=${lngTo},${latTo}`
+    )
+
+    request.setRequestHeader(
+      'Accept',
+      'application/json, application/geo+json, application/gpx+xml, img/png; charset=utf-8'
+    )
+
+    request.onreadystatechange = function () {
+      if (this.readyState === 4) {
+        if (this.status === 200) {
+          const responseObj = JSON.parse(this.responseText)
+          const distance = responseObj?.features[0]?.properties?.segments[0]?.distance
+          resolve(distance)
+        } else {
+          reject(new Error('Failed to fetch data'))
+        }
+      }
+    }
+
+    request.send()
+  })
+}
+
 class SocketManager {
   private static instance: SocketManager
   private io: Server
@@ -74,6 +104,9 @@ class SocketManager {
         const elasticsearchService = ElasticsearchService.getInstance()
         const geocodeStart = await elasticsearchService.search(message.addressStart, '*')
         const geocodeEnd = await elasticsearchService.search(message.addressEnd, '*')
+        console.log(geocodeStart)
+        console.log(geocodeEnd)
+
         if (geocodeStart.length) {
           message.geocodeStart = geocodeStart[0]._source
         }
@@ -98,11 +131,29 @@ class SocketManager {
           }
           console.log(message)
         } catch (e) {
-          console.log(e)
+          console.log('cc' + e)
         }
 
+        console.log('step2')
+
         if (geocodeStart.length && geocodeEnd.length) {
-          publishToMediator({ type: 'GEOLOCATION_RESOLVED', data: message })
+          console.log('step3')
+          const distance = calculateRealDistance(
+            message?.geocodeStart?.lat,
+            message?.geocodeStart?.lng,
+            message?.geocodeEnd?.lat,
+            message?.geocodeEnd?.lng
+          )
+          const object = {
+            ...message,
+            distance: distance
+          }
+
+          console.log('distance calculate')
+
+          console.log(object)
+
+          publishToMediator({ type: 'GEOLOCATION_RESOLVED', data: object })
         } else {
           publishToMediator({ type: 'CUSTOMER_REQUESTED', data: message })
         }
