@@ -3,8 +3,7 @@ import { publishToMediator } from './mediator'
 import LocationModel from '~/models/LocationModel'
 import HotlineModel from '~/models/HotlineModel'
 import OrderModel from '../../models/OrderModel'
-// import XMLHttpRequest from 'xhr2'
-// import { RedisService } from '../redis'
+import { RedisService } from '../redis'
 
 interface LocationDriver {
   from: { lat: number; lng: number }
@@ -58,7 +57,7 @@ class CoordinatorService {
   static orderDriverInfoStore: OrderDriverInfoStore = {}
   constructor() {}
   public static startListening = async (channel: amqp.Channel, queueName: string) => {
-    // const redisService = RedisService.getInstance()
+    const redisService = RedisService.getInstance()
     CoordinatorService.orderDriverInfoStore = {}
 
     console.log('Coordinator Service is listening...')
@@ -199,12 +198,30 @@ class CoordinatorService {
 
             this.orderDriverInfoStore[message?.data?.idOrder].shift()
 
+            channel.ack(msg)
+          } else if (message.type === 'COORDINATION_ORDER_TRACKING') {
             // Lưu vào radis để theo dõi lịch trình
-            // try {
-            //   await redisService.set(IDOrder, order)
-            // } catch (error) {
-            //   console.error('Error:', error)
-            // }
+            const driverLocation = message?.data.location
+            const orderId = message?.data?.idOrder
+
+            if (orderId) {
+              try {
+                const order = await OrderModel.findOne({ _id: orderId })
+                if (order) {
+                  const dataToStore = {
+                    order,
+                    driverLocation: driverLocation
+                  }
+
+                  await redisService.set(orderId, JSON.stringify(dataToStore))
+                } else {
+                  console.error(`Order with ID ${orderId} not found`)
+                }
+              } catch (error) {
+                console.error('Error:', error)
+              }
+            }
+
             channel.ack(msg)
           } else if (message.type === 'COORDINATION_DENY_REQUEST') {
             // 5. Tài xế bỏ cuốc, kiếm thằng khác

@@ -108,9 +108,19 @@ class SocketManager {
         // 2. Theo dõi tài xế
         // Data là idCustomer, lat, lng của Driver
         publishToMediator({ type: 'CUSTOMER_FOLLOW_DRIVER', data: inforDriver })
+        // 3. Redis theo dõi đơn hàng
+        const object = {
+          idOrder: inforDriver.idOrder,
+          location: {
+            lat: inforDriver?.location?.lat,
+            lng: inforDriver?.location?.lng
+          }
+        }
+
+        publishToMediator({ type: 'COORDINATION_ORDER_TRACKING', data: object })
       })
       socket.on('cancelOrder', (inforDriver: any) => {
-        // 2. Hủy đơn
+        // 3. Hủy đơn
         // Data gồm idDriver và idOrder
         // Push sang Coordination để kiếm thằng khác
         publishToMediator({ type: 'COORDINATION_DENY_REQUEST', data: inforDriver })
