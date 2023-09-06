@@ -1,0 +1,9 @@
+authtoken: 2UusaypogOKih0AbaFG7i59Xxcx_bpHehZE5L9qtjZzTLRfj
+tunnels:
+  web:
+    proto: http
+    addr: 80  # Cổng của ứng dụng web của bạn
+  ssh:
+    proto: tcp
+    addr: 22  # Cổng SSH của máy chủ của bạn
+  # Thêm các tunnel khác ở đây nếu cần

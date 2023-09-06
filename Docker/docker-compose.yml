@@ -79,11 +79,13 @@ services:
     container_name: smsservice
     ports:
       - "3007:3007"
-
+      
   ngrok:
-    image: wernight/ngrok
+    image: ngrok/ngrok:alpine
     ports:
       - "4040:4040"
     environment:
-      - NGROK_PORT=80
-      - NGROK_AUTH=2UudGCzFonBpQY9umVaD5AJgKv9_2LJ8e7akWxEoiiHwKp1Nj
+      NGROK_AUTHTOKEN: '2UusaypogOKih0AbaFG7i59Xxcx_bpHehZE5L9qtjZzTLRfj'
+    command: 'http nginx:80'
+    depends_on:
+      - nginx
