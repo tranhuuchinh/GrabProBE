@@ -165,30 +165,21 @@ class SocketManager {
           } else {
             message.user = user._id
           }
-          console.log(message)
         } catch (e) {
-          console.log('cc' + e)
+          console.log(e)
         }
-
-        console.log('step2')
 
         if (geocodeStart.length && geocodeEnd.length) {
           console.log('step3')
-          const distance = await calculateRealDistance(
-            message?.geocodeStart?.lat,
-            message?.geocodeStart?.lng,
-            message?.geocodeEnd?.lat,
-            message?.geocodeEnd?.lng
-          )
+          // const distance = await calculateRealDistance(
+          //   message?.geocodeStart?.lat,
+          //   message?.geocodeStart?.lng,
+          //   message?.geocodeEnd?.lat,
+          //   message?.geocodeEnd?.lng
+          // )
           const object = {
-            ...message,
-            distance: distance
+            ...message
           }
-
-          console.log('distance calculate')
-
-          console.log(object)
-
           publishToMediator({ type: 'GEOLOCATION_RESOLVED', data: object })
         } else {
           publishToMediator({ type: 'CUSTOMER_REQUESTED', data: message })

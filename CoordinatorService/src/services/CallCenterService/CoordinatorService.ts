@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-catch */
 import * as amqp from 'amqplib/callback_api'
 import { publishToMediator } from './mediator'
 import LocationModel from '~/models/LocationModel'
@@ -27,31 +28,65 @@ interface OrderDriverInfoStore {
   [idOrder: string]: Driver[]
 }
 
-const calculateRealDistance = (latFrom: number, lngFrom: number, latTo: number, lngTo: number): Promise<number> => {
-  return new Promise((resolve, reject) => {
-    // const request = new XMLHttpRequest()
+// const calculateRealDistance = (latFrom: number, lngFrom: number, latTo: number, lngTo: number): Promise<number> => {
+//   return new Promise((resolve, reject) => {
+//     // const request = new XMLHttpRequest()
 
-    // request.open(
-    //   'GET',
-    //   `https://api.openrouteservice.org/v2/directions/driving-car?api_key=${process.env.NOMINATIM_KEY}&start=${lngFrom},${latFrom}&end=${lngTo},${latTo}`
-    // )
+//     // request.open(
+//     //   'GET',
+//     //   `https://api.openrouteservice.org/v2/directions/driving-car?api_key=${process.env.NOMINATIM_KEY}&start=${lngFrom},${latFrom}&end=${lngTo},${latTo}`
+//     // )
 
-    // request.setRequestHeader(
-    //   'Accept',
-    //   'application/json, application/geo+json, application/gpx+xml, img/png; charset=utf-8'
-    // )
+//     // request.setRequestHeader(
+//     //   'Accept',
+//     //   'application/json, application/geo+json, application/gpx+xml, img/png; charset=utf-8'
+//     // )
 
-    // request.onreadystatechange = function () {
-    //   if (this.readyState === 4) {
-    //     const responseObj = JSON.parse(this.responseText)
-    //     const distance = responseObj?.features[0]?.properties?.segments[0]?.distance
-    //     resolve(distance)
-    //   }
-    // }
+//     // request.onreadystatechange = function () {
+//     //   if (this.readyState === 4) {
+//     //     const responseObj = JSON.parse(this.responseText)
+//     //     const distance = responseObj?.features[0]?.properties?.segments[0]?.distance
+//     //     resolve(distance)
+//     //   }
+//     // }
 
-    // request.send()
-    resolve(30)
-  })
+//     // request.send()
+//     resolve(30)
+//   })
+// }
+const calculateRealDistance = async (
+  latFrom: number,
+  lngFrom: number,
+  latTo: number,
+  lngTo: number
+): Promise<number> => {
+  try {
+    const response = await fetch(
+      `https://api.openrouteservice.org/v2/directions/driving-car?api_key=${process.env.NOMINATIM_KEY}&start=${lngFrom},${latFrom}&end=${lngTo},${latTo}`,
+      {
+        method: 'GET',
+        headers: {
+          Accept: 'application/json, application/geo+json, application/gpx+xml, img/png; charset=utf-8'
+        }
+      }
+    )
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch data')
+    }
+
+    const data = await response.json()
+    const distance = data?.features[0]?.properties?.segments[0]?.distance
+
+    if (typeof distance === 'number') {
+      console.log(distance)
+      return distance
+    } else {
+      throw new Error('Distance not found in response')
+    }
+  } catch (error) {
+    throw error
+  }
 }
 
 class CoordinatorService {
@@ -95,8 +130,12 @@ class CoordinatorService {
               if (typeTransport) {
                 const pricePerKm = typeTransport.priceperKm
 
-                const distance = parseFloat(message?.data?.distance)
-                console.log(distance)
+                const distance = await calculateRealDistance(
+                  message?.data?.geocodeStart?.lat,
+                  message?.data?.geocodeStart?.lng,
+                  message?.data?.geocodeEnd?.lat,
+                  message?.data?.geocodeEnd?.lng
+                )
 
                 // Tính toán totalPrice dựa trên pricePerKm và distance
                 const totalPrice = pricePerKm * distance
