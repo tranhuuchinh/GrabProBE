@@ -34,106 +34,18 @@ class SendSMSService {
 
     static sendSMS = async () => {
         const accountSid = 'AC530d5e90d802ddfd1b9e32e6fe476fee';
-        const authToken = '8353a13c9fcc35eeb6a90530d09994dc';
+        const authToken = 'b43663c1bbe19e3046fc9ee659a3f1cb';
         const client = new Twilio(accountSid, authToken);
 
         client.messages
             .create({
                 from: '+12565884188',
                 to: '+84377023495',
-                body: 'Con Chó Chính  ',
+                body: 'Đã tìm được tài xế  ',
             })
             .then((message) => console.log(message.sid))
             .catch((error) => console.log(error));
     };
-
-    // Vonage
-    // static sendSMS = async () => {
-    //     await vonage.sms
-    //         .send({ to, from, text })
-    //         .then((resp) => {
-    //             console.log('Message sent successfully');
-    //             console.log(resp);
-    //         })
-    //         .catch((err) => {
-    //             console.log('There was an error sending the messages.');
-    //             console.error(err);
-    //         });
-    // };
-
-    // SpeedSMS
-    // static sendSMS = async (phones, content, type, sender) => {
-    //     const url = 'api.speedsms.vn';
-    //     const params = JSON.stringify({
-    //         to: phones,
-    //         content: content,
-    //         sms_type: type,
-    //         sender: sender,
-    //     });
-
-    //     const buf = Buffer.from(ACCESS_TOKEN + ':x'); // Sử dụng Buffer.from() thay vì new Buffer()
-    //     const auth = 'Basic ' + buf.toString('base64');
-    //     const options = {
-    //         hostname: url,
-    //         port: 443,
-    //         path: '/index.php/sms/send',
-    //         method: 'POST',
-    //         headers: {
-    //             'Content-Type': 'application/json',
-    //             Authorization: auth,
-    //         },
-    //     };
-
-    //     const req = https.request(options, function (res) {
-    //         res.setEncoding('utf8');
-    //         let body = ''; // Khởi tạo body là một chuỗi rỗng
-    //         res.on('data', function (d) {
-    //             body += d;
-    //         });
-    //         res.on('end', function () {
-    //             console.log('Response body:', body); // In ra nội dung của phản hồi
-    //             try {
-    //                 const json = JSON.parse(body);
-    //                 if (json.status === 'success') {
-    //                     console.log('send sms success');
-    //                 } else {
-    //                     console.log('send sms failed ' + body);
-    //                 }
-    //             } catch (error) {
-    //                 console.error('Failed to parse JSON:', error);
-    //             }
-    //         });
-    //     });
-
-    //     req.on('error', function (e) {
-    //         console.log('send sms failed: ' + e);
-    //     });
-
-    //     req.write(params);
-    //     req.end();
-    // };
-
-    // eSMS
-    // static sendSMS = async () => {
-    //     try {
-    //         const response = await axios.get(data);
-
-    //         const obj = response.data;
-    //         console.log(obj);
-    //         if (obj.CodeResult === 100) {
-    //             console.log('CodeResult:', obj.CodeResult);
-    //             console.log('CountRegenerate:', obj.CountRegenerate);
-    //             console.log('SMSID:', obj.SMSID);
-    //         } else {
-    //             console.log('ErrorMessage:', obj.ErrorMessage);
-    //         }
-    //     } catch (error) {
-    //         console.error('Error:', error.message);
-    //     }
-    // };
 }
 
 module.exports = SendSMSService;
-
-//send test sms
-//sendSMS(['your phone number'], "test ná»™i dung sms", 2, '');

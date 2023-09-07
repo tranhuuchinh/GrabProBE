@@ -95,7 +95,12 @@ class CoordinatorService {
               if (typeTransport) {
                 const pricePerKm = typeTransport.priceperKm
 
-                const distance = parseFloat(message?.data?.distance)
+                const distance = await calculateRealDistance(
+                  message?.data?.geocodeStart?.lat,
+                  message?.data?.geocodeStart?.lng,
+                  message?.data?.geocodeEnd?.lat,
+                  message?.data?.geocodeEnd?.lng
+                )
 
                 // Tính toán totalPrice dựa trên pricePerKm và distance
                 const totalPrice = pricePerKm * distance
