@@ -6,6 +6,7 @@ import HotlineModel from '~/models/HotlineModel'
 import TypeTransportModel from '~/models/TypeTransportModel'
 import OrderModel from '../../models/OrderModel'
 import { RedisService } from '../redis'
+import ConditionModel from '~/models/ConditionModel'
 
 interface LocationDriver {
   from: { lat: number; lng: number }
@@ -89,6 +90,31 @@ const calculateRealDistance = async (
   }
 }
 
+async function getWeatherData(lat: number, lon: number) {
+  const apiUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${process.env.OPEN_WEATHER_KEY}`
+
+  try {
+    const response = await fetch(apiUrl)
+
+    if (response.status === 200) {
+      // Parse dữ liệu JSON
+      const weatherData = await response.json()
+      return weatherData
+    } else {
+      throw new Error(`Không thể lấy dữ liệu. Mã trạng thái: ${response.status}`)
+    }
+  } catch (error: any) {
+    throw new Error(`Lỗi khi lấy dữ liệu thời tiết: ${error.message}`)
+  }
+}
+
+// const value = 'config.Time = BUOI_CHIEU & config.Time>=17 && config.Time <=19 && Location == Q3@@DieuPhoi.UuTien'
+// const timeCondition = 'config.Time >= 0 && config.Time <= 19=>>0.2'
+// const locationCondition =
+//   'config.LocationFrom.indexOf("Quận 1") !== -1 || config.LocationTo.indexOf("Quận 1") !== -1=>>0.1'
+// const weatherCondition =
+//   'config.Weather[0]?.main === "Rain" || config.Weather[0]?.main === "Thunderstorm" || config.Weather[0]?.main === "Tornado" || config.Weather[0]?.main === "Drizzle"=>>0.2'
+
 class CoordinatorService {
   static orderDriverInfoStore: OrderDriverInfoStore = {}
   constructor() {}
@@ -106,6 +132,28 @@ class CoordinatorService {
           if (message.type === 'GEOLOCATION_RESOLVED') {
             console.log('Geolocation')
             console.log(message.data)
+
+            const weather = await getWeatherData(message?.data?.geocodeStart?.lat, message?.data?.geocodeStart?.lng)
+            const currentDate = new Date()
+            const hours = currentDate.getHours()
+
+            const condition = await ConditionModel.find().lean()
+
+            let percent = 0
+            const config = {
+              Time: hours,
+              LocationFrom: message?.data?.addressStart,
+              LocationTo: message?.data?.geocodeEnd,
+              Weather: weather?.weather
+            }
+
+            for (let i = 0; i < condition.length; i++) {
+              const items = condition[i].value?.split('=>>')
+              if (eval(items[0])) {
+                percent += parseFloat(items[1])
+              }
+            }
+            console.log(percent)
 
             // Tạo Location model
             let locationStart = await LocationModel.findOne({ address: message?.data?.addressStart })
@@ -138,7 +186,7 @@ class CoordinatorService {
                 )
 
                 // Tính toán totalPrice dựa trên pricePerKm và distance
-                const totalPrice = pricePerKm * distance
+                const totalPrice = pricePerKm * distance * (1 + percent)
 
                 const order = await (
                   await (
@@ -169,7 +217,7 @@ class CoordinatorService {
                 )
 
                 const newOrder = { user, order }
-                console.log('coor', newOrder)
+                // console.log('coor', newOrder)
                 // Tiến hành điều phối xe
                 // const order = await Order({
                 //   idCustomer:
@@ -268,7 +316,9 @@ class CoordinatorService {
               try {
                 const order = await OrderModel.findOne({ _id: orderId })
                 if (order) {
+                  const oldOrder = JSON.parse((await redisService.get(orderId)) || '{}')
                   const dataToStore = {
+                    user: oldOrder?.user,
                     order,
                     driverLocation: driverLocation
                   }
