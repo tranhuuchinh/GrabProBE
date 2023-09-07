@@ -7,11 +7,6 @@ import TypeTransportModel from '~/models/TypeTransportModel'
 import OrderModel from '../../models/OrderModel'
 import { RedisService } from '../redis'
 
-interface LocationDriver {
-  from: { lat: number; lng: number }
-  to: { lat: number; lng: number }
-}
-
 interface Driver {
   idDriver: string
   from: {
@@ -28,32 +23,6 @@ interface OrderDriverInfoStore {
   [idOrder: string]: Driver[]
 }
 
-// const calculateRealDistance = (latFrom: number, lngFrom: number, latTo: number, lngTo: number): Promise<number> => {
-//   return new Promise((resolve, reject) => {
-//     // const request = new XMLHttpRequest()
-
-//     // request.open(
-//     //   'GET',
-//     //   `https://api.openrouteservice.org/v2/directions/driving-car?api_key=${process.env.NOMINATIM_KEY}&start=${lngFrom},${latFrom}&end=${lngTo},${latTo}`
-//     // )
-
-//     // request.setRequestHeader(
-//     //   'Accept',
-//     //   'application/json, application/geo+json, application/gpx+xml, img/png; charset=utf-8'
-//     // )
-
-//     // request.onreadystatechange = function () {
-//     //   if (this.readyState === 4) {
-//     //     const responseObj = JSON.parse(this.responseText)
-//     //     const distance = responseObj?.features[0]?.properties?.segments[0]?.distance
-//     //     resolve(distance)
-//     //   }
-//     // }
-
-//     // request.send()
-//     resolve(30)
-//   })
-// }
 const calculateRealDistance = async (
   latFrom: number,
   lngFrom: number,
@@ -80,7 +49,7 @@ const calculateRealDistance = async (
 
     if (typeof distance === 'number') {
       console.log(distance)
-      return distance
+      return distance / 1000
     } else {
       throw new Error('Distance not found in response')
     }
