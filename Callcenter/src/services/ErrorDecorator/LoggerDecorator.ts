@@ -1,4 +1,10 @@
 import { Logger } from './Logger'
+import Logstash from 'logstash-client'
+
+const logstash = new Logstash({
+  host: 'logstash.example.org',
+  port: 9600
+})
 
 abstract class LoggerDecorator implements Logger {
   protected logger: Logger

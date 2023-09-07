@@ -79,6 +79,7 @@ export const setupMediator = async (queues: string[]) => {
 }
 
 export const publishToMediator = (message: any) => {
+  console.log(message)
   if (channel) {
     channel.publish(EXCHANGE_NAME, '', Buffer.from(JSON.stringify(message)))
   }

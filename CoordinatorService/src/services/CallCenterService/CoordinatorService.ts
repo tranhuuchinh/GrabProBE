@@ -96,6 +96,7 @@ class CoordinatorService {
                 const pricePerKm = typeTransport.priceperKm
 
                 const distance = parseFloat(message?.data?.distance)
+                console.log(distance)
 
                 // Tính toán totalPrice dựa trên pricePerKm và distance
                 const totalPrice = pricePerKm * distance
