@@ -73,7 +73,6 @@ class CoordinatorService {
           const message = JSON.parse(msg.content?.toString())
 
           if (message.type === 'GEOLOCATION_RESOLVED') {
-            console.log('Geolocation')
             console.log(message.data)
 
             // Tạo Location model
@@ -137,14 +136,17 @@ class CoordinatorService {
                   }
                 )
 
-                const newOrder = { user, order }
-                console.log('coor', newOrder)
-                // Tiến hành điều phối xe
-                // const order = await Order({
-                //   idCustomer:
-                // })
+                const inforData = {
+                  idCustomer: message?.data?.user,
+                  lat: message?.data?.geocodeStart?.lat,
+                  lon: message?.data?.geocodeStart?.lng,
+                  idOrder: order?._id,
+                  type: message?.data?.type
+                }
 
-                // publishToMediator({ type: 'COORDINATOR_RESOLVED', data: message.data })
+                publishToMediator({ type: 'DRIVER_FIND_DRIVER', data: inforData })
+
+                const newOrder = { user, order }
                 publishToMediator({ type: 'RIDE_STATUS_UPDATED', data: newOrder })
               }
             } catch (error) {
@@ -225,7 +227,9 @@ class CoordinatorService {
               }
             }
 
-            this.orderDriverInfoStore[message?.data?.idOrder].shift()
+            if (this.orderDriverInfoStore[message?.data?.idOrder]) {
+              this.orderDriverInfoStore[message?.data?.idOrder].shift()
+            }
 
             channel.ack(msg)
           } else if (message.type === 'COORDINATION_ORDER_TRACKING') {

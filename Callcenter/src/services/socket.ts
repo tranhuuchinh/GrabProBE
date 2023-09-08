@@ -140,17 +140,7 @@ class SocketManager {
         }
 
         if (geocodeStart.length && geocodeEnd.length) {
-          console.log('step3')
-          // const distance = await calculateRealDistance(
-          //   message?.geocodeStart?.lat,
-          //   message?.geocodeStart?.lng,
-          //   message?.geocodeEnd?.lat,
-          //   message?.geocodeEnd?.lng
-          // )
-          const object = {
-            ...message
-          }
-          publishToMediator({ type: 'GEOLOCATION_RESOLVED', data: object })
+          publishToMediator({ type: 'GEOLOCATION_RESOLVED', data: message })
         } else {
           publishToMediator({ type: 'CUSTOMER_REQUESTED', data: message })
         }
