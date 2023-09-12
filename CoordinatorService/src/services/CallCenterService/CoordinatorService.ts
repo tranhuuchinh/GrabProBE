@@ -8,11 +8,6 @@ import OrderModel from '../../models/OrderModel'
 import { RedisService } from '../redis'
 import ConditionModel from '~/models/ConditionModel'
 
-interface LocationDriver {
-  from: { lat: number; lng: number }
-  to: { lat: number; lng: number }
-}
-
 interface Driver {
   idDriver: string
   from: {
@@ -29,32 +24,6 @@ interface OrderDriverInfoStore {
   [idOrder: string]: Driver[]
 }
 
-// const calculateRealDistance = (latFrom: number, lngFrom: number, latTo: number, lngTo: number): Promise<number> => {
-//   return new Promise((resolve, reject) => {
-//     // const request = new XMLHttpRequest()
-
-//     // request.open(
-//     //   'GET',
-//     //   `https://api.openrouteservice.org/v2/directions/driving-car?api_key=${process.env.NOMINATIM_KEY}&start=${lngFrom},${latFrom}&end=${lngTo},${latTo}`
-//     // )
-
-//     // request.setRequestHeader(
-//     //   'Accept',
-//     //   'application/json, application/geo+json, application/gpx+xml, img/png; charset=utf-8'
-//     // )
-
-//     // request.onreadystatechange = function () {
-//     //   if (this.readyState === 4) {
-//     //     const responseObj = JSON.parse(this.responseText)
-//     //     const distance = responseObj?.features[0]?.properties?.segments[0]?.distance
-//     //     resolve(distance)
-//     //   }
-//     // }
-
-//     // request.send()
-//     resolve(30)
-//   })
-// }
 const calculateRealDistance = async (
   latFrom: number,
   lngFrom: number,
@@ -81,7 +50,7 @@ const calculateRealDistance = async (
 
     if (typeof distance === 'number') {
       console.log(distance)
-      return distance
+      return distance / 1000
     } else {
       throw new Error('Distance not found in response')
     }
@@ -130,7 +99,6 @@ class CoordinatorService {
           const message = JSON.parse(msg.content?.toString())
 
           if (message.type === 'GEOLOCATION_RESOLVED') {
-            console.log('Geolocation')
             console.log(message.data)
 
             const weather = await getWeatherData(message?.data?.geocodeStart?.lat, message?.data?.geocodeStart?.lng)
@@ -216,14 +184,17 @@ class CoordinatorService {
                   }
                 )
 
-                const newOrder = { user, order }
-                // console.log('coor', newOrder)
-                // Tiến hành điều phối xe
-                // const order = await Order({
-                //   idCustomer:
-                // })
+                const inforData = {
+                  idCustomer: message?.data?.user,
+                  lat: message?.data?.geocodeStart?.lat,
+                  lon: message?.data?.geocodeStart?.lng,
+                  idOrder: order?._id,
+                  type: message?.data?.type
+                }
 
-                // publishToMediator({ type: 'COORDINATOR_RESOLVED', data: message.data })
+                publishToMediator({ type: 'DRIVER_FIND_DRIVER', data: inforData })
+
+                const newOrder = { user, order }
                 publishToMediator({ type: 'RIDE_STATUS_UPDATED', data: newOrder })
               }
             } catch (error) {
@@ -304,7 +275,9 @@ class CoordinatorService {
               }
             }
 
-            this.orderDriverInfoStore[message?.data?.idOrder].shift()
+            if (this.orderDriverInfoStore[message?.data?.idOrder]) {
+              this.orderDriverInfoStore[message?.data?.idOrder].shift()
+            }
 
             channel.ack(msg)
           } else if (message.type === 'COORDINATION_ORDER_TRACKING') {
