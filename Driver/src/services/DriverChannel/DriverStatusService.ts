@@ -15,6 +15,13 @@ class DriverStatusService {
             socketManager.sendBroadcastWithType(message.data.type, 'driverClient', message.data)
 
             channel.ack(msg)
+          } else if (message.type === 'DRIVER_EMIT_DRIVER_1') {
+            console.log('DRIVER_FIND_DRIVER_1')
+
+            console.log(message.data)
+            // 1. Nhận thông tin khách hàng từ Coordinator gửi về tất cả tài xế
+            socketManager.sendBroadcastWithType(message.data.type, 'driverClient', message.data)
+            channel.ack(msg)
           } else if (message.type === 'DRIVER_EMIT_DRIVER') {
             console.log('Tài xế EMIT')
             console.log(message.data)

@@ -54,7 +54,8 @@ const OrderSchema = new mongoose.Schema(
       default: 0
     },
     method: {
-      type: Number
+      type: Number,
+      default: 0
     },
     feedback: {
       type: Number,

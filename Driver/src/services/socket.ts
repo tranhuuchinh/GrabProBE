@@ -99,6 +99,7 @@ class SocketManager {
             }
             publishToMediator({ type: 'COORDINATION_ACCEPT_REQUEST', data: object })
             publishToMediator({ type: 'CUSTOMER_ACCEPT_REQUEST', data: object })
+            publishToMediator({ type: 'SEND_SMS', data: object })
           })
           .catch((error) => {
             console.error('Error updating order:', error)

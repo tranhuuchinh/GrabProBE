@@ -9,7 +9,7 @@ class SendSMSService {
                 if (msg && msg.content) {
                     const message = JSON.parse(msg.content.toString());
                     if (message.type === 'SEND_SMS') {
-                        await this.sendSMS('Đơn hàng đã đặt, đang tìm tài xế');
+                        await this.sendSMS('Tài xế đang đến - Xe Airblack màu Đen - Biển số 56AA-01244');
                         channel.ack(msg);
                     } else if (message.type === 'DRIVER_FOUND_SMS') {
                         await this.sendSMS('Đã tìm thấy tài xế');
@@ -22,8 +22,8 @@ class SendSMSService {
     };
 
     static sendSMS = async (content) => {
-        const accountSid = 'heheboy';
-        const authToken = 'auth';
+        const accountSid = 'AC530d5e90d802ddfd1b9e32e6fe476fee';
+        const authToken = 'b43663c1bbe19e3046fc9ee659a3f1cb';
         const client = new Twilio(accountSid, authToken);
 
         client.messages

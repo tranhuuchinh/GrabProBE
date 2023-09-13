@@ -144,7 +144,10 @@ class CoordinatorService {
                   type: message?.data?.type
                 }
 
-                publishToMediator({ type: 'DRIVER_FIND_DRIVER', data: inforData })
+                console.log('Gửi qua tìm Driver')
+                console.log(inforData)
+
+                publishToMediator({ type: 'DRIVER_FIND_DRIVER_1', data: inforData })
 
                 const newOrder = { user, order }
                 publishToMediator({ type: 'RIDE_STATUS_UPDATED', data: newOrder })
@@ -259,22 +262,21 @@ class CoordinatorService {
           } else if (message.type === 'COORDINATION_DENY_REQUEST') {
             // 5. Tài xế bỏ cuốc, kiếm thằng khác
             // data là idOrder, idDriver
-            // if (this.orderDriverInfoStore[message?.data?.idOrder]) {
-            //   this.orderDriverInfoStore[message?.data?.idOrder] = this.orderDriverInfoStore[
-            //     message?.data?.idOrder
-            //   ].filter((driver: Driver) => driver?.idDriver !== message?.data?.idDriver)
-            // }
+            if (this.orderDriverInfoStore[message?.data?.idOrder]) {
+              this.orderDriverInfoStore[message?.data?.idOrder] = this.orderDriverInfoStore[
+                message?.data?.idOrder
+              ].filter((driver: Driver) => driver?.idDriver !== message?.data?.idDriver)
+            }
 
             // //Kiếm lại thằng tiếp theo trong danh sách
-            // if (this.orderDriverInfoStore[message?.data?.idOrder]?.length > 0) {
-            //   const shortestDistanceDriver = this.orderDriverInfoStore[message?.data?.idOrder][0]
-            //   const driverIdOrderInfo = {
-            //     idOrder: message?.data?.idOrder,
-            //     idDriver: shortestDistanceDriver?.idDriver
-            //   }
-            //   publishToMediator({ type: 'DRIVER_EMIT_DRIVER', data: driverIdOrderInfo })
-            // }
-            // Nếu trong danh sách hết nhưng vẫn chưa tìm được tài tài xế
+            if (this.orderDriverInfoStore[message?.data?.idOrder]?.length > 0) {
+              const shortestDistanceDriver = this.orderDriverInfoStore[message?.data?.idOrder][0]
+              const driverIdOrderInfo = {
+                idOrder: message?.data?.idOrder,
+                idDriver: shortestDistanceDriver?.idDriver
+              }
+              publishToMediator({ type: 'DRIVER_EMIT_DRIVER', data: driverIdOrderInfo })
+            }
             channel.ack(msg)
           }
         }

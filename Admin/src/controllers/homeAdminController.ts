@@ -15,15 +15,25 @@ export default {
       let totalSale = 0 // Tổng doanh thu trong ngày
       let totalOrder = 0 // Tổng số đơn hàng trong ngày
 
-      // Lấy doanh thu trong ngày
-      const listOrders = await OrderModel.find({
-        create_at: {
-          // $gte: currentDate,
-          // $lt: new Date()
-          $gte: new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate()),
-          $lt: new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() + 1)
-        }
-      }).exec()
+      const specificDate = new Date() // Thay '2023-09-07' bằng ngày cụ thể bạn muốn lấy
+
+      const startOfDay = new Date(specificDate)
+      startOfDay.setHours(0, 0, 0, 0)
+
+      const endOfDay = new Date(specificDate)
+      endOfDay.setHours(23, 59, 59, 999)
+
+      const listOrders = await OrderModel.find({}).exec()
+
+      // // Lấy doanh thu trong ngày
+      // const listOrders = await OrderModel.find({
+      //   create_at: {
+      //     // $gte: currentDate,
+      //     // $lt: new Date()
+      //     $gte: new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate()),
+      //     $lt: new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() + 1)
+      //   }
+      // }).exec()
 
       listOrders.forEach((order) => {
         totalSale += order.totalPrice
@@ -33,51 +43,21 @@ export default {
       totalOrder = listOrders.length
 
       // Lấy khách hàng mới trong ngày
-      const totalCustomer = await CustomerModel.find({
-        create_at: {
-          // $gte: currentDate,
-          // $lt: new Date()
-          $gte: new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate()),
-          $lt: new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() + 1)
-        }
-      })
-        .count()
-        .exec()
+      const totalCustomer = await CustomerModel.find({}).count().exec()
 
       // Lấy tài xế mới trong ngày
-      const totalDriver = await DriverModel.find({
-        create_at: {
-          // $gte: currentDate,
-          // $lt: new Date()
-          $gte: new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate()),
-          $lt: new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() + 1)
-        }
-      })
-        .count()
-        .exec()
+      const totalDriver = await DriverModel.find({}).count().exec()
 
       // Lấy khách hàng đặt qua ứng dụng trong ngày
       const totalOrderApp = await OrderModel.find({
-        create_at: {
-          // $gte: currentDate,
-          // $lt: new Date()
-          method: 0,
-          $gte: new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate()),
-          $lt: new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() + 1)
-        }
+        method: 0
       })
         .count()
         .exec()
 
       // Lấy khách hàng đặt qua call center trong ngày
       const totalOrderCall = await OrderModel.find({
-        create_at: {
-          // $gte: currentDate,
-          // $lt: new Date()
-          method: 0,
-          $gte: new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate()),
-          $lt: new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() + 1)
-        }
+        method: 1
       })
         .count()
         .exec()

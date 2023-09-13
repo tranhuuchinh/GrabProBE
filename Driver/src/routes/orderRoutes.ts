@@ -7,8 +7,6 @@ const router = express.Router()
 router.route('/').get(ordersController.getOrders)
 router.route('/:orderId').get(ordersController.getOrderByID)
 
-// Update feedback
-router.route('/:id').patch(ordersController.updateFeedBack)
 router.route('/:id').patch(ordersController.updateStatus)
 
 export default router
