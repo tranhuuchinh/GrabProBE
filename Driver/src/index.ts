@@ -60,7 +60,7 @@ const startApp = async () => {
   DriverStatusService.startListening(channel, queueNameDriver)
 }
 
-// startApp()
+startApp()
 
 /**
  * Server Activation
